@@ -1,0 +1,194 @@
+    <!DOCTYPE html>
+    <html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Title</title>
+        <th:block></th:block>
+        <th:block th:replace="~{/common/layout :: head}"></th:block>
+        <link rel="stylesheet" href="/css/flatpickr.css">
+        <link rel="stylesheet" href="/css/home.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css">
+        <link rel="stylesheet" href="/css/toastr.min.css">
+        <script src="/js/wow.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
+        <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+        <script src="/js/toastr.min.js"></script>
+
+    </head>
+    <body class="bg-body-dark">
+    <div th:replace="common/layout.html :: nav"></div>
+
+        <div id="carouselExampleInterval" class="carousel slide carousel-fade pt-5" data-bs-ride="carousel" data-bs-pause="false">
+            <div class="carousel-inner">
+                <div class="carousel-item active" data-bs-interval="10000">
+                    <img src="/images/banner1.jpg" class="d-block" alt="...">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h1>Giá Vé Tốt Nhất</h1>
+                        <p>Chúng tôi cung cấp giá vé máy bay tốt nhất!</p>
+                        <button class="bookNowButton btn btn-warning mb-4">Đặt Vé Ngay</button>
+                    </div>
+                </div>
+                <div class="carousel-item" data-bs-interval="5000">
+                    <img src="/images/banner-1.jpg" class="d-block w-100" alt="...">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h1>Đặt Vé Máy Bay Nhanh Chóng</h1>
+                        <p>Khám phá thế giới với giá vé hấp dẫn!</p>
+                        <button class="bookNowButton btn btn-warning mb-4">Đặt Vé Ngay</button>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="/images/mb1.jpg" class="d-block w-100" alt="...">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h1>Khám Phá Thế Giới</h1>
+                        <p>Chuyến đi mơ ước đang chờ bạn!</p>
+                        <button class="bookNowButton btn btn-warning mb-4">Đặt Vé Ngay</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    <!-- Đặt vé -->
+    <section class="wow fadeInUp" data-wow-duration="2s">
+        <div class="container mt-5 pt-5" id="booking">
+            <div class="booking-section w-75 mx-auto">
+                <h2 class="text-center">Đặt Vé Máy Bay</h2>
+                <form id="form-search" action="/flights/search" method="POST">
+                    <div class="row mb-3">
+                        <div class="col-md-6 d-flex align-items-center gap-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="tripType" id="oneWay" value="oneway" checked>
+                                <label class="form-check-label" for="oneWay">1 chiều</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="tripType" id="roundTrip" value="roundtrip">
+                                <label class="form-check-label" for="roundTrip">Khứ hồi</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="departure" class="form-label">Khởi Hành</label>
+                            <div class="dropdown location-dropdown">
+                                <input type="text" class="form-control location-input dropdown-toggle" id="departure"
+                                       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                       placeholder="Chọn điểm khởi hành" autocomplete="off" readonly>
+                                <input type="hidden" name="departureAirportId" id="departureAirportId">
+                                <ul class="dropdown-menu" aria-labelledby="departure">
+                                    <li th:each="airport : ${airports}" class="dropdown-item departure-item" th:data-value="${airport.airportId}">
+                                        <span class="city-code" th:text="${airport.airportCode}"></span>
+                                        <span class="city-departure" th:text="${airport.city}"></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="arrival" class="form-label">Điểm Đến</label>
+                            <div class="dropdown location-dropdown">
+                                <input type="text" class="form-control location-input dropdown-toggle" id="arrival"
+                                       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                       placeholder="Chọn điểm đến" autocomplete="off" readonly>
+                                <input type="hidden" name="arrivalAirportId" id="arrivalAirportId">
+                                <ul class="dropdown-menu arrival-dropdown-menu" aria-labelledby="arrival">
+
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="departure-date" class="form-label">Ngày Khởi Hành</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-calendar-days"></i></span>
+                                <input name="departure-date" th:value="${departureTime}" type="text"
+                                       class="form-control date-flatpickr" id="departure-date" placeholder="Chọn ngày">
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3" id="return-date-wrapper" style="display: none;">
+                            <label for="return-date" class="form-label">Ngày Về</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-calendar-days"></i></span>
+                                <input name="return-date" type="text" class="form-control date-flatpickr" id="return-date" placeholder="Chọn ngày về">
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row justify-content-center mt-4">
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">Tìm Máy Bay</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Danh sách chuyến bay -->
+    <!-- <div class="container">
+        <section class="wow fadeInUp" data-wow-duration="2s">
+            <h2 class="text-center pt-4 fw-bold content-title pt-5">Các Chuyến Máy Bay Đề Xuất</h2>
+        </section>
+        <section class="wow fadeInUp" data-wow-duration="2s">
+            <div class="swiper-container my-5">
+                <div class="swiper-wrapper" id="flight-list">
+                    <div th:each="flight : ${flights}" class="swiper-slide">
+                        <div class="card shadow" style="width: 18rem;">
+                            <img class="card-img-top" th:src="'/images/' + ${flight.arrivalAirport.airportCode} + '.jpg'"
+                                 alt="card-img">
+                            <div class="card-body">
+                                <h5 class="card-title"><span th:text="${flight.departureAirport.city}"></span> - <span
+                                        th:text="${flight.arrivalAirport.city}"></span></h5>
+                                <p class="card-text"
+                                   th:text="${#temporals.format(flight.departureTime, 'HH:mm  dd-MM-yyyy')}"></p>
+                                <h5 th:text="${#numbers.formatDecimal(flight.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></h5>
+                                <div class="d-flex justify-content-end">
+                                    <a th:href="@{'/flights/' + ${flight.flightId} + '/seats'}" class="btn btn-sm btn-primary mt-3 text-light">Đặt vé</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div> -->
+
+    <!-- Ảnh dưới cùng-->
+    <section class="wow fadeInUp" data-wow-duration="2s">
+        <div class="container">
+            <img src="/images/footer-img-1.jpg" alt="" class="rounded-3 w-100">
+        </div>
+    </section>
+
+    <!-- Nút cuộn trang lên đầu -->
+        <dotlottie-player
+                id="scrollToTop"
+                src="https://lottie.host/f90124be-3592-4015-9d47-198363a9e687/11XQzibSHV.json"
+                background="transparent" speed="1" style="width: 80px; height: 80px;" loop autoplay>
+
+        </dotlottie-player>
+
+    <section class="wow fadeInUp" data-wow-duration="2s">
+        <div th:replace="common/layout.html :: footer"></div>
+    </section>
+    
+
+    
+    <script src="/js/home.js"></script>
+    <script th:inline="javascript">
+        let messageWarning = [[${messageWarning}]];
+
+        if (messageWarning) {
+            Swal.fire({
+                title: messageWarning,
+                icon: "warning",
+                iconColor: "#ffc107",
+                confirmButtonText: "Đóng",
+                color: "#003366"
+            });
+        }
+    </script>
+    </body>
+    </html>

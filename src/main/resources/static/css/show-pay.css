@@ -1,0 +1,91 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #ffffff !important;
+    margin: 0;
+    padding: 0;
+    color: #003366 !important;
+}
+
+.main-title {
+    color: #003366;
+}
+fieldset {
+    border: 2px solid #DEE2E6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+legend {
+    font-weight: bold;
+    color: #003366;
+    font-size: 1.1em;
+}
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+    color: #003366 !important;
+}
+input {
+    width: calc(100% - 22px);
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #CED4DA;
+    border-radius: 6px;
+    font-size: 1em;
+}
+input[type="date"], input[type="number"], input[type="tel"], input[type="email"] {
+    font-family: inherit;
+}
+
+.inline-label {
+    display: inline-block;
+    margin-right: 10px;
+}
+.title {
+    font-weight: bold;
+    font-size: 16px;
+}
+.main-container {
+    margin-top: 100px;
+}
+.flatpickr-monthDropdown-month {
+    color: #003366;
+}
+.main-content {
+    border-radius: 30px;
+    background-color: #f4f4fd;
+}
+.seats-list {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #DEE2E6;
+}
+
+.seats-list p {
+    font-weight: 600;
+    color: #003366;
+    margin-bottom: 10px;
+    font-size: 1em;
+}
+
+.seats-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.seats-list li {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #003366;
+    color: white;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.95em;
+}

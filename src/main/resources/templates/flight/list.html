@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lựa Chọn Chuyến Bay</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <th:block th:replace="~{/common/layout :: head}"></th:block>
+    <link rel="stylesheet" href="/css/flights.css">
+    <link rel="stylesheet" href="/css/seat-re.css">
+</head>
+<body>
+<th:block th:replace="~{/common/layout :: navbar}"></th:block>
+<!-- file.list.html -->
+<div class="container pt-5">
+    <div class="container-content my-5">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1><i class="fa-solid fa-plane me-3"></i>Lựa Chọn Chuyến Máy Bay</h1>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="location-info">
+                    <p><i class="fas fa-map-marker-alt me-2" id="departureAirportId"></i>Khởi hành</p>
+                    <h3 th:text="${departureAirport.airportName} + ' (' + ${departureAirport.airportCode} + ')'"></h3>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="location-info">
+                    <p><i class="fas fa-map-marker-alt me-2"></i>Điểm đến</p>
+                    <h3 th:text="${arrivalAirport.airportName} + ' (' + ${arrivalAirport.airportCode} + ')'"></h3>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="location-info" th:if="${!departureDate.isEmpty()}">
+                    <p><i class="fa-regular fa-calendar-days me-2"></i>Ngày</p>
+                    <h3 th:text="${departureDate}"></h3>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12">
+                <form id="search-form" action="/flightDate" method="post">
+                    <input type="hidden" id="selected-date" name="selectedDate"/>
+                    <input type="hidden" name="departureAirportCode" th:value="${departureAirport.airportCode}"/>
+                    <input type="hidden" name="arrivalAirportCode" th:value="${arrivalAirport.airportCode}"/>
+                    <input type="hidden" name="passengers" th:value="${passengers}"/>
+                </form>
+                <div id="date-selector1" class="date-selector d-flex justify-content-center mb-4"></div>
+                <h3 th:if="${flights.isEmpty()}" class="text-center fw-bold text-result">Không có chuyến máy bay cần
+                    tìm!!</h3>
+                <div id="search-meta" th:attr="data-trip-type=${tripType}"></div>
+                
+                <!-- LAYOUT MỚI: Train Cards -->
+                <div th:unless="${flights.isEmpty()}" class="train-list">
+                    <div th:each="flight : ${flights}" class="train-card">
+                        <div class="train-info">
+                            <div class="train-code" th:text="${flight.flightNumber}"></div>
+                            <div class="available-seats" th:text="${'Còn ' + (availableSeats[flight.flightId] != null ? availableSeats[flight.flightId] : flight.seatCapacity) + ' ghế trống'}"></div>
+                        </div>
+
+                        <div class="journey-details">
+                            <div class="station-time">
+                                <div class="station-name" th:text="${departureAirport.airportName}"></div>
+                                <div class="time" th:text="${#temporals.format(flight.departureTime, 'HH:mm')}"></div>
+                                <div class="date" th:text="${#temporals.format(flight.departureTime, 'dd/MM/yyyy')}"></div>
+                            </div>
+
+                            <div class="journey-visual">
+                                <div class="train-number">
+                                    <span th:with="hours=${T(java.time.Duration).between(flight.departureTime, flight.arrivalTime).toHours()},
+                                                   minutes=${T(java.time.Duration).between(flight.departureTime, flight.arrivalTime).toMinutes() % 60}"
+                                          th:text="${hours + 'h' + minutes + 'p'}">
+                                    </span>
+                                </div>
+                                <div class="journey-line"></div>
+                                <div class="fas fa-arrow-right me-2"></div>
+                            </div>
+
+                            <div class="station-time">
+                                <div class="station-name" th:text="${arrivalAirport.airportName}"></div>
+                                <div class="time" th:text="${#temporals.format(flight.arrivalTime, 'HH:mm')}"></div>
+                                <div class="date" th:text="${#temporals.format(flight.arrivalTime, 'dd/MM/yyyy')}"></div>
+                            </div>
+                        </div>
+
+                        <div class="price-booking">
+                            <div class="price-label">Từ</div>
+                            <div class="price">
+                                <span th:text="${minPrices[flight.flightId] != null ? 
+                                    #numbers.formatDecimal(minPrices[flight.flightId], 0, 'COMMA', 0, 'POINT') : 
+                                    #numbers.formatDecimal(flight.price, 0, 'COMMA', 0, 'POINT')}"></span> ₫
+                            </div>
+                <button type="button"
+                    th:data-flight-id="${flight.flightId}"
+                    data-leg="outbound"
+                    th:disabled="${(availableSeats[flight.flightId] != null ? availableSeats[flight.flightId] : flight.seatCapacity) == 0}"
+                    th:class="${(availableSeats[flight.flightId] != null ? availableSeats[flight.flightId] : flight.seatCapacity) == 0 ? 'btn btn-secondary disabled book-btn' : 'btn btn-primary open-seat-modal book-btn'}">
+                                <i class="fas fa-arrow-right me-2"></i>Chọn chỗ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PHẦN CHUYẾN VỀ -->
+                <div th:if="${tripType == 'roundtrip'}" id="return-section">
+                    <hr/>
+                    <div class="row mt-4">
+                        <div class="col-12 text-center">
+                            <h2 class="fw-bold">Chuyến Về</h2>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="location-info">
+                                <p><i class="fas fa-map-marker-alt me-2"></i>Khởi hành</p>
+                                <h3 th:text="${arrivalAirport.airportName} + ' (' + ${arrivalAirport.airportCode} + ')'"></h3>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="location-info">
+                                <p><i class="fas fa-map-marker-alt me-2"></i>Điểm đến</p>
+                                <h3 th:text="${departureAirport.airportName} + ' (' + ${departureAirport.airportCode} + ')'"></h3>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="location-info" th:if="${returnDate != null and !#strings.isEmpty(returnDate)}">
+                                <p><i class="fa-regular fa-calendar-days me-2"></i>Ngày về</p>
+                                <h3 th:text="${returnDate}"></h3>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 th:if="${returnFlights == null or returnFlights.isEmpty()}" class="text-center fw-bold text-result">Không có chuyến về phù hợp</h3>
+                    
+                    <!-- LAYOUT MỚI: Return Train Cards -->
+                    <div th:unless="${returnFlights == null or returnFlights.isEmpty()}" class="train-list mt-3">
+                        <div th:each="flight : ${returnFlights}" class="train-card">
+                                <div class="train-info">
+                                    <div class="train-code" th:text="${flight.flightNumber}"></div>
+                                    <div class="available-seats" th:text="${'Còn ' + (availableSeats[flight.flightId] != null ? availableSeats[flight.flightId] : flight.seatCapacity) + ' ghế trống'}"></div>
+                                </div>
+
+                            <div class="journey-details">
+                                <div class="station-time">
+                                    <div class="station-name" th:text="${arrivalAirport.airportName}"></div>
+                                    <div class="time" th:text="${#temporals.format(flight.departureTime, 'HH:mm')}"></div>
+                                    <div class="date" th:text="${#temporals.format(flight.departureTime, 'dd/MM/yyyy')}"></div>
+                                </div>
+
+                                <div class="journey-visual">
+                                    <div class="train-number">
+                                        <span th:with="hours=${T(java.time.Duration).between(flight.departureTime, flight.arrivalTime).toHours()},
+                                                       minutes=${T(java.time.Duration).between(flight.departureTime, flight.arrivalTime).toMinutes() % 60}"
+                                              th:text="${hours + 'h' + minutes + 'p'}">
+                                        </span>
+                                    </div>
+                                    <div class="journey-line"></div>
+                                    <div class="duration">→</div>
+                                </div>
+
+                                <div class="station-time">
+                                    <div class="station-name" th:text="${departureAirport.airportName}"></div>
+                                    <div class="time" th:text="${#temporals.format(flight.arrivalTime, 'HH:mm')}"></div>
+                                    <div class="date" th:text="${#temporals.format(flight.arrivalTime, 'dd/MM/yyyy')}"></div>
+                                </div>
+                            </div>
+
+                            <div class="price-booking">
+                                <div class="price-label">Từ</div>
+                                <div class="price">
+                                    <span th:text="${minPrices[flight.flightId] != null ? 
+                                        #numbers.formatDecimal(minPrices[flight.flightId], 0, 'COMMA', 0, 'POINT') : 
+                                        #numbers.formatDecimal(flight.price, 0, 'COMMA', 0, 'POINT')}"></span> ₫
+                                </div>
+                <button type="button"
+                    th:data-flight-id="${flight.flightId}"
+                    data-leg="return"
+                    th:disabled="${(availableSeats[flight.flightId] != null ? availableSeats[flight.flightId] : flight.seatCapacity) == 0}"
+                    th:class="${(availableSeats[flight.flightId] != null ? availableSeats[flight.flightId] : flight.seatCapacity) == 0 ? 'btn btn-secondary disabled book-btn' : 'btn btn-primary open-seat-modal book-btn'}">
+                                    <i class="fas fa-arrow-right me-2"></i>Chọn chỗ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Seat Selection Modal -->
+<div class="modal fade" id="seatSelectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="seat-modal-title">Chọn ghế</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0" id="seat-modal-body">
+                <!-- dynamic seat content -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="confirm-seat-selection">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- hidden holder for fetched HTML to safely query elements -->
+    <div id="seat-modal-cache" class="d-none"></div>
+</div>
+
+<th:block th:replace="~{/common/layout :: footer}"></th:block>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/seat.js"></script>
+<script src="/js/socket.js"></script>
+<script src="/js/flight.js"></script>
+<script th:inline="javascript">
+    (function(){
+    const modalEl = document.getElementById('seatSelectModal');
+    let modal;
+    let currentLeg = 'outbound';
+    let currentFlightId = null;
+    const selection = { outbound: null, return: null };
+
+    // Ensure Bootstrap is loaded
+    function ensureBootstrapLoaded() {
+        return new Promise((resolve) => {
+            if (window.bootstrap && window.bootstrap.Modal) {
+                resolve();
+                return;
+            }
+            const existing = document.querySelector('script[data-dynamic-bootstrap]');
+            if (existing) {
+                existing.addEventListener('load', () => resolve());
+                return;
+            }
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js';
+            s.setAttribute('data-dynamic-bootstrap', 'true');
+            s.onload = () => resolve();
+            s.onerror = () => {
+                console.error('Failed to load Bootstrap');
+                resolve();
+            };
+            document.body.appendChild(s);
+        });
+    }
+
+    function ensureModal(){
+        if (!modal && window.bootstrap && window.bootstrap.Modal) {
+            modal = new bootstrap.Modal(modalEl);
+        }
+        return modal;
+    }
+
+    function initializeSeatSelection() {
+        const seatInputs = document.querySelectorAll('#seat-modal-body .tab-pane input[type="checkbox"]:not([disabled])');
+
+        const seatIdsInput = document.getElementById('seat-ids');
+        const selectedSeatsDisplay = document.querySelector('#seat-modal-body .selected-seats');
+        const totalPriceDisplay = document.querySelector('#seat-modal-body .total-price');
+        const selectedCountDisplay = document.querySelector('#seat-modal-body #selected-count');   
+        const classTypeDisplay = document.querySelector('#seat-modal-body #seat-class-type');
+
+        if (!seatIdsInput) {
+            console.error('Missing required elements for seat selection');
+            return;
+        }
+
+        const selectedSeats = new Set();
+
+        seatInputs.forEach(input => {
+            const label = input.nextElementSibling;
+            const seatId = input.dataset.seatId;
+            const seatNumber = input.dataset.seatNumber;
+            const seatLi = input.closest('.seat');
+
+            if (!seatLi || !seatId) return;
+
+            const handleClick = (e) => {
+                e.preventDefault();
+                if (input.disabled) return;
+
+                if (seatLi.classList.contains('selected')) {
+                    seatLi.classList.remove('selected');
+                    selectedSeats.delete(seatId);
+                } else {
+                    seatLi.classList.add('selected');
+                    selectedSeats.add(seatId);
+                }
+                updateSummary();
+            };
+
+            input.addEventListener('click', handleClick);
+            if (label) label.addEventListener('click', handleClick);
+        });
+
+        function updateSummary() {
+            const count = selectedSeats.size;
+            let totalPrice = 0;
+
+            const seatNumbers = [];
+            const seatIds = [];
+            const classTypes = new Set();
+
+            selectedSeats.forEach(id => {
+                const el = document.querySelector(`#seat-modal-body input[data-seat-id="${id}"]`);
+                if (!el) return;
+                const p = parseFloat(el.dataset.seatPrice) || 0;
+                const classType = el.dataset.classType || '';
+                totalPrice += p;
+                seatNumbers.push(el.dataset.seatNumber || id);
+                seatIds.push(id);
+
+                if (classType) {
+                    classTypes.add(classType);
+                }
+            });
+
+            seatIdsInput.value = seatIds.join(',');
+
+            if (selectedCountDisplay) selectedCountDisplay.textContent = count;
+            if (selectedSeatsDisplay) selectedSeatsDisplay.textContent = (seatNumbers.length === 0) ? 'Chưa chọn ghế' : seatNumbers.join(', ');
+            if (totalPriceDisplay) totalPriceDisplay.textContent = totalPrice.toLocaleString('vi-VN') + ' VND';
+            if (classTypeDisplay) {
+                const classTypeText = classTypes.size > 0 ? Array.from(classTypes).join(', ') : '--';
+                classTypeDisplay.textContent = classTypeText;
+            }
+        }
+
+        updateSummary();
+    }
+
+    function initializeBootstrapTabs() {
+        const tabList = document.querySelector('#seat-modal-body .nav-pills');
+        if (!tabList) return;
+
+        tabList.querySelectorAll('.nav-link').forEach(tabEl => {
+            const newTab = new bootstrap.Tab(tabEl);
+            tabEl.addEventListener('click', (e) => {
+                e.preventDefault();
+                newTab.show();
+            });
+        });
+
+        const activeTab = tabList.querySelector('.nav-link.active');
+        if (!activeTab) {
+            const firstTab = tabList.querySelector('.nav-link');
+            if (firstTab) {
+                firstTab.classList.add('active');
+                const targetId = firstTab.getAttribute('data-bs-target');
+                const pane = document.querySelector(targetId);
+                if (pane) {
+                    pane.classList.add('show', 'active');
+                }
+            }
+        }
+    }
+
+    async function openSeatModal(flightId, leg){
+        try {
+            const body = document.getElementById('seat-modal-body');
+            body.innerHTML = '<div class="text-center p-5"><div class="spinner-border" role="status"></div><p class="mt-3">Đang tải thông tin ghế...</p></div>';
+
+            await ensureBootstrapLoaded();
+            
+            currentLeg = leg;
+            currentFlightId = flightId;
+
+            const resp = await fetch(`/flights/${flightId}/seats`, { 
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin'
+            });
+
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+            const html = await resp.text();
+            const cache = document.getElementById('seat-modal-cache');
+            cache.innerHTML = html;
+
+            const coachTabs = cache.querySelector('.coach-tabs');
+            const tabContent = cache.querySelector('.tab-content');
+            const summary = cache.querySelector('.summary');
+            const priceInput = cache.querySelector('#seat-price');
+            const flightHidden = cache.querySelector('input[name="flightId"]');
+            const seatIdsHidden = cache.querySelector('#seat-ids');
+
+            if (!coachTabs || !tabContent) {
+                throw new Error('Không tìm thấy thông tin toa/ghế');
+            }
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'container-fluid';
+
+            const tabsRow = document.createElement('div');
+            tabsRow.className = 'row';
+            const tabsCol = document.createElement('div');
+            tabsCol.className = 'col-12';
+            if (coachTabs) tabsCol.appendChild(coachTabs.cloneNode(true));
+            tabsRow.appendChild(tabsCol);
+
+            // Row 2: Seat grid (left) + Summary (right)
+            const contentRow = document.createElement('div');
+            contentRow.className = 'row';
+
+            const leftCol = document.createElement('div');
+            leftCol.className = 'col-xl-8 col-lg-12 p-3';
+            if (tabContent) leftCol.appendChild(tabContent.cloneNode(true));
+
+            const rightCol = document.createElement('div');
+            rightCol.className = 'col-xl-4 col-lg-12 p-3';
+
+            if (summary) {
+                const summaryClone = summary.cloneNode(true);
+                const payForm = summaryClone.querySelector('form[action="/pay"]');
+                if (payForm) payForm.remove();
+                rightCol.appendChild(summaryClone);
+            }
+
+            if (priceInput) rightCol.appendChild(priceInput.cloneNode(true));
+            if (flightHidden) rightCol.appendChild(flightHidden.cloneNode(true));
+            if (seatIdsHidden) rightCol.appendChild(seatIdsHidden.cloneNode(true));
+
+            contentRow.appendChild(leftCol);
+            contentRow.appendChild(rightCol);
+
+            wrapper.appendChild(tabsRow);
+            wrapper.appendChild(contentRow);
+
+            body.innerHTML = '';
+            body.appendChild(wrapper);
+
+            const title = document.getElementById('seat-modal-title');
+            const confirmBtn = document.getElementById('confirm-seat-selection');
+            const meta = document.getElementById('search-meta');
+            const isRT = meta && meta.dataset.tripType === 'roundtrip';
+
+            if (title) {
+                title.textContent = leg === 'return' ? 'Chọn ghế - Chiều về' : 'Chọn ghế - Chiều đi';
+            }
+            if (confirmBtn) {
+                confirmBtn.textContent = (isRT && leg === 'outbound') ? 'Chọn chuyến về' : 'Tiến hành thanh toán';
+            }
+
+            initializeBootstrapTabs();
+            initializeSeatSelection();
+
+            ensureModal().show();
+
+        } catch (error) {
+            console.error('Error loading seat modal:', error);
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Không thể tải thông tin ghế. Vui lòng thử lại.'
+                });
+            } else {
+                alert('Lỗi tải dữ liệu ghế.');
+            }
+        }
+    }
+
+    // MỞ MODAL KHI NHẤN NÚT "Chọn"
+    document.addEventListener('click', function(e){
+        const btn = e.target.closest('.open-seat-modal');
+        if (!btn) return;
+        
+        e.preventDefault();
+        
+        const flightId = btn.getAttribute('data-flight-id');
+        const leg = btn.getAttribute('data-leg') || 'outbound';
+        
+        if (!flightId) return;
+        
+        openSeatModal(flightId, leg);
+    });
+
+    // XÁC NHẬN CHỌN GHẾ
+    document.getElementById('confirm-seat-selection').addEventListener('click', function(){
+        const seatIdsInput = document.getElementById('seat-ids');
+        
+        if (!seatIdsInput || !seatIdsInput.value) {
+            Swal.fire({ 
+                icon: 'warning', 
+                title: 'Chưa chọn ghế',
+                text: 'Vui lòng chọn ít nhất 1 ghế' 
+            });
+            return;
+        }
+        
+        const seatIds = seatIdsInput.value.split(',').map(s => s.trim()).filter(Boolean);
+        const seatPrice = document.getElementById('seat-price')?.value || 0;
+
+        selection[currentLeg] = { 
+            flightId: currentFlightId, 
+            seatIds: seatIds, 
+            seatPrice: parseFloat(seatPrice)
+        };
+        
+        ensureModal().hide();
+
+        const meta = document.getElementById('search-meta');
+        const isRT = meta && meta.dataset.tripType === 'roundtrip';
+        
+        if (!isRT) {
+            submitPayment('outbound');
+        } else if (currentLeg === 'outbound') {
+            Swal.fire({ 
+                icon: 'success', 
+                title: 'Đã lưu ghế chiều đi',
+                text: 'Vui lòng chọn ghế chiều về.' 
+            });
+            document.getElementById('return-section')?.scrollIntoView({ behavior: 'smooth' });
+        } else if (currentLeg === 'return' && selection.outbound && selection.return) {
+            submitPayment('both');
+        }
+    });
+
+    function submitPayment(leg) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/pay';
+
+        if (leg === 'both') {
+            const out = selection.outbound;
+            const ret = selection.return;
+            if (!out || !ret) return;
+
+            const of = document.createElement('input'); of.type = 'hidden'; of.name = 'outboundFlightId'; of.value = out.flightId; form.appendChild(of);
+            out.seatIds.forEach(id => { const i = document.createElement('input'); i.type = 'hidden'; i.name = 'outboundSeatIds'; i.value = id; form.appendChild(i); });
+            const rf = document.createElement('input'); rf.type = 'hidden'; rf.name = 'returnFlightId'; rf.value = ret.flightId; form.appendChild(rf);
+            ret.seatIds.forEach(id => { const i = document.createElement('input'); i.type = 'hidden'; i.name = 'returnSeatIds'; i.value = id; form.appendChild(i); });
+        } else {
+            const data = selection[leg];
+            if (!data) return;
+            const flightInput = document.createElement('input');
+            flightInput.type = 'hidden'; flightInput.name = 'flightId'; flightInput.value = data.flightId;
+            form.appendChild(flightInput);
+            data.seatIds.forEach(id => {
+                const seatInput = document.createElement('input');
+                seatInput.type = 'hidden'; seatInput.name = 'seatIds'; seatInput.value = id;
+                form.appendChild(seatInput);
+            });
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+})();
+</script>
+</body>
+</html>

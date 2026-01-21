@@ -1,0 +1,86 @@
+.carousel-item img {
+    width: 100%;
+    height: 720px;
+    object-fit: cover;
+    object-position: center;
+}
+
+/*** testimonial Start ***/
+.testimonial .owl-nav .owl-prev {
+    position: absolute;
+    top: -58px;
+    right: 0;
+    color: #005599;
+    padding: 5px 25px;
+    border: 1px solid #ffc107;
+    border-radius: 20px;
+    transition: 0.5s;
+}
+
+.testimonial .owl-nav .owl-prev:hover {
+    background: #ffc107;
+    color: white;
+}
+
+.testimonial .owl-nav .owl-next {
+    position: absolute;
+    top: -58px;
+    right: 88px;
+    color: #005599;
+    padding: 5px 25px;
+    border: 1px solid #ffc107;
+    border-radius: 20px;
+    transition: 0.5s;
+}
+
+.testimonial .owl-nav .owl-next:hover {
+    background: #ffc107;
+    color: white;
+}
+/*** testimonial End ***/
+
+/* Định dạng cho nút cuộn trang lên đầu */
+#scrollToTop {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 1000;
+    transition: 0.7s;
+}
+
+#scrollToTop:hover {
+    transform: scale(1.3);
+}
+
+#scrollToTop i {
+    font-size: 20px; /* Kích thước icon */
+}
+
+.content-title {
+    color: #003366;
+}
+
+.swal2-confirm {
+    color: #fff;
+    background-color: #ffc107;
+}
+
+.swiper-container {
+    overflow: hidden;
+}
+
+.back-to-top {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 999;
+}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Booking - Giới Thiệu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/introduction.css">
+    <th:block th:replace="~{/common/layout :: head}"></th:block>
+</head>
+<body>
+<div th:replace="common/layout.html :: nav"></div>
+
+<main>
+    <div class="container main-container">
+        <section id="about">
+            <h2>Giới Thiệu</h2>
+            <p>Chào mừng bạn đến với Flight Booking! Chúng tôi là hãng hàng không đầu với các dịch vụ an toàn và chất
+                lượng. Chúng tôi cam kết mang đến trải nghiệm tuyệt vời nhất cho hành khách của mình.</p>
+        </section>
+        <section id="video">
+            <h2>Video Giới Thiệu</h2>
+            <div class="video-container">
+                <video width="560" height="315" controls autoplay muted>
+                    <source src="/video/video-intro.mp4" type="video/mp4">
+                    Trình duyệt của bạn không hỗ trợ thẻ video.
+                </video>
+            </div>
+        </section>
+        <section id="contact">
+            <h2>Liên Hệ</h2>
+            <div class="contact-info">
+                <p><strong>Địa chỉ:</strong> Số 23 Thôn Ngọc Liên Xã Thanh Oai TP Hà Nội</p>
+                <p><strong>Email:</strong> <a href="mailto:flightbooking@gmail.com">flightbooking@gmail.com</a>
+                </p>
+                <p><strong>Điện thoại:</strong> +84 999999999</p>
+            </div>
+        </section>
+    </div>
+</main>
+<div th:replace="common/layout.html :: footer"></div>
+</body>
+</html>

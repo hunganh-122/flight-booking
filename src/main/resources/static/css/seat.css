@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(to bottom right, #e0f7fa, #b2ebf2);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navbar {
+    background-color: #003366;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    top: 0;
+}
+
+.navbar-brand {
+    font-family: 'Pacifico', cursive;
+    font-size: 2rem;
+    color: #ffc107 !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.seat-selection-container {
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+    padding: 30px;
+    margin-top: 50px;
+    max-width: 1000px;
+    width: 100%;
+}
+
+.plane-header h2 {
+    color: #003366;
+}
+
+.seat {
+    width: 40px;
+    height: 40px;
+    margin: 5px;
+    border: 2px solid #007bff;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #f0f8ff;
+}
+
+.seat:hover {
+    background-color: #cceeff;
+    transform: scale(1.1);
+}
+
+.seat.selected {
+    background-color: #007bff;
+    color: white;
+    animation: selectSeat 0.5s ease forwards;
+}
+
+.seat.unavailable {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+    cursor: not-allowed;
+}
+
+.plane-header i {
+    font-size: 48px;
+    color: #007bff;
+}
+
+.summary {
+    position: fixed;
+    right: 5%;
+    top: 30%;
+    background-color: #e9ecef;
+    border-radius: 10px;
+}
+
+.summary h4 {
+    color: #007bff;
+}
+
+@keyframes selectSeat {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(1.2);
+    }
+}

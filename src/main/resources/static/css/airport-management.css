@@ -1,0 +1,218 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f8ff;
+}
+.sidebar {
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #343a40;
+    padding: 20px;
+    width: 250px;
+}
+.sidebar a {
+    color: #ffffff;
+    display: block;
+    padding: 15px;
+    text-decoration: none;
+    font-size: 18px;
+}
+.sidebar a:hover {
+    background-color: #007bff;
+}
+.content {
+    margin-left: 270px;
+    padding: 20px;
+}
+.navbar {
+    background-color: #007bff;
+}
+.navbar-brand, .navbar-nav .nav-link {
+    color: #ffffff;
+}
+.card {
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.card-header {
+    background-color: #007bff;
+    color: #ffffff;
+    border-radius: 10px 10px 0 0;
+}
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+.table th, .table td {
+    vertical-align: middle;
+}
+.navbar {
+    background-color: #0056b3;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.navbar-brand {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffffff;
+}
+.navbar-nav .nav-link {
+    color: #ffffff;
+    font-size: 18px;
+    margin-left: 20px;
+}
+.navbar-nav .nav-link:hover {
+    color: #f8f9fa;
+}
+.navbar .badge {
+    background-color: #ff3e3e;/* Đặt nền cho toàn bộ trang */
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f0f8ff;
+        margin: 0;
+    }
+
+    /* Định dạng cho khung chứa nội dung */
+    .container {
+        max-width: 1200px;
+    }
+
+    /* Định dạng cho thẻ card */
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Định dạng cho tiêu đề của card */
+    .card-header {
+        background-color: #007bff;
+        color: #ffffff;
+        border-radius: 10px 10px 0 0;
+        text-align: center;
+        padding: 15px;
+    }
+
+    /* Định dạng cho nút thêm chuyến bay và sân bay */
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    /* Định dạng cho các ô của bảng */
+    .table th,
+    .table td {
+        vertical-align: middle;
+    }
+
+    /* Định dạng cho tiêu đề của bảng */
+    .table th {
+        background-color: #f8f9fa;
+    }
+
+    /* Định dạng cho nút sửa và xóa */
+    .btn-info {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    /* Định dạng cho thanh sidebar */
+    .sidebar {
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: #343a40;
+        padding: 20px;
+        width: 250px;
+    }
+
+    /* Định dạng cho các liên kết trong thanh sidebar */
+    .sidebar a {
+        color: #ffffff;
+        display: block;
+        padding: 15px;
+        text-decoration: none;
+        font-size: 18px;
+    }
+
+    /* Định dạng khi hover lên liên kết trong thanh sidebar */
+    .sidebar a:hover {
+        background-color: #007bff;
+    }
+
+    /* Định dạng cho khu vực nội dung chính */
+    .content {
+        margin-left: 270px;
+        padding: 20px;
+    }
+
+    /* Định dạng cho thanh điều hướng */
+    .navbar {
+        background-color: #007bff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Định dạng cho nhãn hiệu của thanh điều hướng */
+    .navbar-brand {
+        font-size: 24px;
+        font-weight: bold;
+        color: #ffffff;
+    }
+
+    /* Định dạng cho các liên kết trong thanh điều hướng */
+    .navbar-nav .nav-link {
+        color: #ffffff;
+        font-size: 18px;
+        margin-left: 20px;
+    }
+
+    /* Định dạng khi hover lên các liên kết trong thanh điều hướng */
+    .navbar-nav .nav-link:hover {
+        color: #f8f9fa;
+    }
+
+    /* Định dạng cho các thông báo trong thanh điều hướng */
+    .navbar .badge {
+        background-color: #ff3e3e;
+        font-size: 12px;
+        margin-left: 5px;
+    }
+
+    /* Định dạng cho menu thả xuống */
+    .dropdown-menu {
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Định dạng cho các mục trong menu thả xuống */
+    .dropdown-item {
+        font-size: 16px;
+        padding: 10px 20px;
+    }
+
+    /* Định dạng khi hover lên các mục trong menu thả xuống */
+    .dropdown-item:hover {
+        background-color: #0056b3;
+        color: #ffffff;
+    }
+
+    font-size: 12px;
+    margin-left: 5px;
+}
+.dropdown-menu {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.dropdown-item {
+    font-size: 16px;
+    padding: 10px 20px;
+}
+.dropdown-item:hover {
+    background-color: #0056b3;
+    color: #ffffff;
+}

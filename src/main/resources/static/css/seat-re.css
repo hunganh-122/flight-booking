@@ -1,0 +1,394 @@
+*, *:before, *:after {
+    box-sizing: border-box;
+}
+html {
+    font-size: 16px;
+}
+
+.coach-tabs {
+    width: 100%;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+    padding: 15px 0;
+}
+
+.coach-tabs ul.nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    align-items: flex-end;
+}
+
+.coach-tabs .nav-item {
+    flex: 0 0 auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.coach-tabs .nav-link {
+    position: relative;
+    background: linear-gradient(180deg, #1e3a5f 0%, #0d1f3a 100%);
+    color: white;
+    border: 2px solid #2d4a6f;
+    padding: 8px 15px;
+    border-radius: 10px 10px 6px 6px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: 13px;
+    min-width: 80px;
+    height: 45px;
+    box-shadow: 
+        0 3px 0 #0a1628,
+        0 5px 10px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    text-align: center;
+    overflow: visible;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Cửa sổ toa - 3 ô vuông nhỏ */
+.coach-tabs .nav-link::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+    height: 14px;
+    background: 
+        repeating-linear-gradient(90deg, 
+            rgba(135, 206, 250, 0.7) 0px, 
+            rgba(135, 206, 250, 0.7) 18px, 
+            transparent 18px, 
+            transparent 22px);
+    border-radius: 2px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Bánh xe */
+.coach-tabs .nav-link::after {
+    content: '⬤ ⬤';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #1a1a1a;
+    font-size: 8px;
+    letter-spacing: 12px;
+    text-shadow: 
+        0 1px 2px rgba(255, 255, 255, 0.3),
+        0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Đèn tín hiệu trên toa */
+.coach-tabs .nav-link .coach-light {
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    width: 6px;
+    height: 6px;
+    background: #4ade80;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #4ade80;
+    opacity: 0.8;
+}
+
+/* Text bên dưới toa - NGOÀI button */
+.coach-tabs .nav-item .coach-label {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    /* color: white; */
+    white-space: nowrap;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.coach-tabs .nav-item:has(.nav-link.active) .coach-label {
+    /* color: #ffc107; */
+    font-weight: 700;
+}
+
+/* Hover effect */
+.coach-tabs .nav-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 5px 0 #0a1628,
+        0 8px 15px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-color: #3d5a7f;
+}
+
+/* Active state */
+.coach-tabs .nav-link.active {
+    background: linear-gradient(180deg, #ffd54f 0%, #ffa726 100%) !important;
+    color: #1a237e !important;
+    border-color: #ff8f00;
+    box-shadow: 
+        0 3px 0 #cc7a00,
+        0 5px 15px rgba(255, 193, 7, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    font-weight: bold;
+}
+
+.coach-tabs .nav-link.active::before {
+    background: 
+        repeating-linear-gradient(90deg, 
+            rgba(255, 255, 255, 0.95) 0px, 
+            rgba(255, 255, 255, 0.95) 18px, 
+            transparent 18px, 
+            transparent 22px);
+}
+
+.coach-tabs .nav-link.active::after {
+    color: #1a237e;
+}
+
+.coach-tabs .nav-link.active .coach-light {
+    background: #ff1744;
+    box-shadow: 0 0 8px #ff1744;
+}
+
+.coach-tabs .nav-link.locomotive {
+    background: linear-gradient(180deg, #1e3a5f 0%, #0d1f3a 100%);
+    border-color: #2d4a6f;
+    height: 40px;
+    min-width: 85px;
+    border-radius: 45px 10px 6px 6px;
+}
+
+.coach-tabs .nav-link.locomotive::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 70%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 12px;
+    background: linear-gradient(180deg, #1e3a5f 0%, #0d1f3a 100%);
+    border-radius: 35px 30px 0 0;
+    border: 2px solid #2d4a6f;
+    border-bottom: none;
+}
+
+.coach-tabs .nav-link.locomotive::after {
+    content: '◉';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffeb3b;
+    font-size: 16px;
+    text-shadow: 0 0 8px #ffeb3b, 0 0 15px #ffd700;
+    animation: headlight 2s ease-in-out infinite;
+    z-index: 1;
+}
+
+.coach-tabs .nav-link.locomotive:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 5px 0 #8b0000,
+        0 8px 15px rgba(229, 57, 53, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.coach-tabs .nav-link.locomotive.active {
+    background: linear-gradient(180deg, #ffd54f 0%, #ffa726 100%) !important;
+    border-color: #ff8f00;
+}
+
+.coach-tabs .nav-link.locomotive.active::before {
+    background: linear-gradient(180deg, #ffd54f 0%, #ffa726 100%);
+    border-color: #ff8f00;
+}
+
+.coach-tabs .nav-link.locomotive.active::after {
+    color: #fff;
+    text-shadow: 0 0 8px #fff, 0 0 15px #ffd700;
+}
+
+/* ==================== CONTAINER LƯỚI GHẾ ==================== */
+.plane {
+    margin: 0 auto;
+    max-width: 700px;
+    border: 2px solid #d8d8d8;
+    border-radius: 10px;
+    padding: 20px;
+    background: #f7f9fc;
+}
+
+.logo-header h2 {
+    font-family: 'Pacifico', cursive;
+    color: #003366;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* ==================== LƯỚI GHẾ: 4 HÀNG × 10 CỘT ==================== */
+.seat-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 8px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Mỗi hàng ghế */
+.seat-grid > div {
+    display: contents;
+}
+
+/* ==================== GHẾ ==================== */
+.seat {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+}
+
+.seat input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+}
+
+.seat label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: #003366;
+    color: white;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    min-height: 45px;
+}
+
+.seat label:hover {
+    box-shadow: 0 0 0 2px #5C6AFF;
+    transform: scale(1.05);
+}
+
+.seat input[type="checkbox"]:checked + label {
+    background: #bada55;
+    color: #003366;
+}
+
+.seat input[type="checkbox"]:disabled + label {
+    background: #ccc;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.seat input[type="checkbox"]:disabled + label:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.seat.selected label {
+    background: #ffc107 !important; 
+    color: #003366 !important;
+    transform: scale(1.05);
+}
+
+.seat-grid > div:nth-child(2) .seat {
+    margin-bottom: 25px;
+}
+
+/* ==================== THÔNG TIN TÓM TẮT ==================== */
+.summary {
+    border-radius: 10px;
+    padding: 30px;
+    background: white;
+}
+
+.text {
+    color: #003366;
+}
+
+/* ==================== NAVBAR ==================== */
+.navbar {
+    background-color: #003366;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    top: 0;
+    z-index: 999;
+}
+
+.navbar-brand {
+    font-family: 'Pacifico', cursive;
+    font-size: 2rem;
+    color: #ffc107 !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1200px) {
+    .summary {
+        margin-top: 2rem;
+        position: static !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .coach-tabs .nav-link {
+        min-width: 65px;
+        padding: 8px 12px;
+        font-size: 11px;
+        height: 40px;
+        margin-bottom: 22px;
+    }
+
+    .coach-tabs .nav-link.locomotive {
+        min-width: 70px;
+        height: 45px;
+    }
+
+    .coach-tabs .nav-link::before {
+        height: 12px;
+    }
+
+    .coach-tabs .nav-link::after {
+        font-size: 7px;
+        letter-spacing: 8px;
+    }
+
+    .coach-tabs .nav-item .coach-label {
+        font-size: 11px;
+        margin-top: 6px;
+    }
+
+    .coach-tabs .nav-link.locomotive::before {
+        width: 40px;
+        height: 15px;
+        top: -10px;
+    }
+
+    .coach-tabs .nav-link.locomotive::after {
+        font-size: 14px;
+    }
+    
+    .seat-grid {
+        grid-template-columns: repeat(10, 1fr);
+        gap: 4px;
+    }
+    
+    .seat label {
+        font-size: 10px;
+        min-height: 35px;
+    }
+    
+    .plane {
+        padding: 15px;
+    }
+}

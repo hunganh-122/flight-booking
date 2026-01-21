@@ -1,0 +1,237 @@
+body {
+    background: linear-gradient(135deg, #e6f2ff 0%, #b3d9ff 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.navbar {
+    background-color: #003366;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.navbar-brand {
+    font-family: 'Pacifico', cursive;
+    font-size: 2rem;
+    color: #ffc107 !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.font-weight {
+    font-weight: 700;
+}
+
+.card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
+
+.card-header {
+    background-color: #003366 !important;
+    color: white !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    padding: 1rem !important;
+}
+
+.header-null {
+    height: 50vh;
+}
+
+.header-null h1 {
+    color: #003366;
+    height: 100%;
+    align-content: center;
+}
+
+.header-null h1 span {
+    color: #ffc107;
+}
+
+.ticket-item {
+    border-bottom: 1px solid #e0e0e0;
+    padding: 1.5rem 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.ticket-item:last-child {
+    border-bottom: none;
+}
+
+.ticket-item:hover {
+    background-color: #f0f8ff;
+}
+
+.ticket-icon {
+    font-size: 2.5rem !important;
+    color: #003366 !important;
+}
+
+.ticket-details h5 {
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    color: #003366;
+}
+
+.ticket-details h3 {
+    color: #003366;
+    font-weight: 600;
+}
+
+
+.ticket-details p {
+    margin-bottom: 0;
+    color: #666;
+}
+
+.ticket-status {
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+}
+
+.status-confirmed {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-pending {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.status-cancelled {
+    background-color: #dc3545;
+    color: white;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.ticket-item {
+    animation: fadeIn 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+.ticket-item:nth-child(1) { animation-delay: 0.1s; }
+.ticket-item:nth-child(2) { animation-delay: 0.2s; }
+.ticket-item:nth-child(3) { animation-delay: 0.3s; }
+.ticket-item:nth-child(4) { animation-delay: 0.4s; }
+
+.page-title {
+    color: #0056b3;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.modal-content {
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+    background-color: #0056b3;
+    color: white;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.flight-detail {
+    margin-bottom: 1rem;
+}
+
+.flight-detail-label {
+    font-weight: 600;
+    color: #0056b3;
+}
+
+/* --------------- footer --------------- */
+
+footer {
+    background-color: #003366;
+    color: white;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+footer .container-fluid {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+footer .row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+footer .col-lg-4,
+footer .col-md-6,
+footer .col-md-12 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: left;
+}
+
+footer h5 {
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+footer ul {
+    padding: 0;
+    list-style-type: none;
+    margin: 0;
+}
+
+footer ul li {
+    margin-bottom: 10px;
+}
+
+footer a {
+    color: #000;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+footer a:hover {
+    color: #007bff;
+    text-decoration: underline;
+}
+
+footer a i {
+    margin-right: 10px;
+}
+
+.img-payment {
+    width: 320px;
+    height: auto;
+}
+
+.main-container {
+    margin-top: 100px;
+}

@@ -1,0 +1,138 @@
+body {
+    font-family: 'Open Sans', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    line-height: 1.6;
+    background-color: #f4f4f4;
+}
+
+.container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+}
+main {
+    padding: 120px 0 20px; /* Adjusted padding to account for fixed header */
+}
+
+main section {
+    margin-bottom: 40px;
+}
+
+main section h2 {
+    font-size: 2em;
+    color: #003366;
+    border-bottom: 2px solid #003366;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.video-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.contact-info {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.contact-info p {
+    margin: 10px 0;
+}
+
+.contact-info a {
+    color: #003366;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.contact-info a:hover {
+    color: #ffcc00;
+}
+
+.navbar {
+    background-color: #003366;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    height: 75px;
+}
+
+.navbar-brand {
+    font-family: 'Pacifico', cursive;
+    font-size: 2rem;
+    color: #ffc107 !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+/* --------------- footer --------------- */
+
+footer {
+    background-color: #003366;
+    color: white;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+footer .container-fluid {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+footer .row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+footer .col-lg-4,
+footer .col-md-6,
+footer .col-md-12 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: left;
+}
+
+footer h5 {
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+footer ul {
+    padding: 0;
+    list-style-type: none;
+    margin: 0;
+}
+
+footer ul li {
+    margin-bottom: 10px;
+}
+
+footer a {
+    color: #000;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+footer a:hover {
+    color: #007bff;
+    text-decoration: underline;
+}
+
+footer a i {
+    margin-right: 10px;
+}
+
+.img-payment {
+    width: 320px;
+    height: auto;
+}
+
+.main-container {
+    margin-top: 100px;
+}
