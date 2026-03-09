@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Đăng Ký - Flight Booking</title>
+    <th:block th:replace="~{common/layout :: head}"></th:block>
+    <link rel="stylesheet" href="/css/toastr.min.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <style>
+        .register-container {
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .otp-section {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px dashed #007bff;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+        .otp-timer {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+            text-align: center;
+        }
+        .bg-body-dark {
+            background-color: #f4f7f6;
+        }
+    </style>
+</head>
+<body class="bg-body-dark">
+<div th:replace="~{common/layout.html :: navbar}"></div>
+
+<div class="container">
+    <div class="register-container">
+        <h2 class="text-center mb-4" style="color: #003366;">Đăng Ký Tài Khoản</h2>
+        
+        <form id="registerForm" th:action="@{/register}" method="POST">
+            <div class="mb-3">
+                <label for="fullname" class="form-label">Tên đầy đủ</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
+                    <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Nhập họ và tên" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="username" class="form-label">Tên đăng nhập</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Nhập tên đăng nhập" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Nhập email của bạn" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Mật khẩu</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Mật khẩu" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="rePassword" class="form-label">Nhập lại mật khẩu</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-redo"></i></span>
+                    <input type="password" class="form-control" id="rePassword" name="rePassword" placeholder="Nhập lại mật khẩu" required>
+                </div>
+            </div>
+
+            <div class="otp-section" id="otpSection">
+                <h6 class="text-center mb-3">Xác thực OTP</h6>
+                <div class="input-group mb-2">
+                    <span class="input-group-text"><i class="fas fa-key"></i></span>
+                    <input type="text" class="form-control" id="otpCode" name="otpCode" placeholder="Nhập mã 6 số" maxlength="6">
+                    <button class="btn btn-outline-primary" type="button" id="resendOtpBtn">Gửi lại</button>
+                </div>
+                <div class="otp-timer" id="otpTimer">Mã hết hạn sau: <span id="countdown" class="fw-bold text-danger">05:00</span></div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="button" class="btn btn-primary" id="registerBtn" style="background-color: #003366; border: none;">Tiếp tục</button>
+                <button type="submit" class="btn btn-success" id="verifyBtn" style="display: none;">Xác thực & Đăng ký</button>
+            </div>
+            
+            <div class="text-center mt-3">
+                <span>Đã có tài khoản? <a href="/login" style="color: #003366; text-decoration: none; font-weight: bold;">Đăng nhập ngay</a></span>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div th:replace="~{common/layout.html :: footer}"></div>
+
+<script src="/js/toastr.min.js"></script>
+<script src="/js/register.js"></script>
+<script th:inline="javascript">
+    $(document).ready(function() {
+        let error = /*[[${error}]]*/ null;
+        let success = /*[[${success}]]*/ null;
+        
+        if (error) {
+            toastr.error(error);
+        }
+        if (success) {
+            toastr.success(success);
+        }
+    });
+</script>
+</body>
+</html>
