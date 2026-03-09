@@ -16,3 +16,15 @@ INSERT INTO flights (flight_number, airline, departure_airport_id, arrival_airpo
 -- 3. Thêm chuyến bay khứ hồi từ Sài Gòn (SGN) về Hà Nội (HAN) ngày 30/01
 INSERT INTO flights (flight_number, airline, departure_airport_id, arrival_airport_id, departure_time, arrival_time, seat_capacity, price) VALUES 
 ('VN128', 'Vietnam Airlines', @sgn_id, @han_id, '2026-01-30 19:00:00', '2026-01-30 21:15:00', 180, 1600000);
+
+INSERT INTO airports (airport_code, airport_name, city, country) VALUES 
+('DAD', 'Sân bay Quốc tế Đà Nẵng', 'Đà Nẵng', 'Việt Nam'),
+('CXR', 'Sân bay Quốc tế Cam Ranh', 'Khánh Hòa', 'Việt Nam'),
+('PQC', 'Sân bay Quốc tế Phú Quốc', 'Kiên Giang', 'Việt Nam'),
+('DLI', 'Sân bay Liên Khương', 'Lâm Đồng', 'Việt Nam'),
+('HPH', 'Sân bay Quốc tế Cát Bi', 'Hải Phòng', 'Việt Nam'),
+('VII', 'Sân bay Quốc tế Vinh', 'Nghệ An', 'Việt Nam'),
+('UIH', 'Sân bay Phù Cát', 'Bình Định', 'Việt Nam'),
+('VCA', 'Sân bay Quốc tế Cần Thơ', 'Cần Thơ', 'Việt Nam'),
+('VDH', 'Sân bay Đồng Hới', 'Quảng Bình', 'Việt Nam'),
+('THD', 'Sân bay Thọ Xuân', 'Thanh Hóa', 'Việt Nam');

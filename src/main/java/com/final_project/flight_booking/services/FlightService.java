@@ -28,6 +28,9 @@ public class FlightService {
     @Autowired
     private AirportService airportService;
 
+    @Autowired
+    private AmadeusService amadeusService;
+
     public Flight getFlightById(Integer flightId) {
         return flightRepository.findById(flightId).orElse(null);
     }
@@ -72,13 +75,13 @@ public class FlightService {
         flightRepository.removeUserFromFlight(flightId);
     }
 
-    // New methods moved from Controller
-
     public Map<Integer, Double> getMinPricesForFlights(List<Flight> flights) {
         Map<Integer, Double> minPrices = new HashMap<>();
         if (flights != null) {
             for (Flight f : flights) {
-                if (!minPrices.containsKey(f.getFlightId())) {
+                if (f.getFlightId() < 0) {
+                    minPrices.put(f.getFlightId(), f.getPrice());
+                } else if (!minPrices.containsKey(f.getFlightId())) {
                     Double min = seatService.findMinPriceByFlightId(f.getFlightId());
                     minPrices.put(f.getFlightId(), min);
                 }
@@ -91,7 +94,9 @@ public class FlightService {
         Map<Integer, Long> availableSeats = new HashMap<>();
         if (flights != null) {
             for (Flight f : flights) {
-                if (!availableSeats.containsKey(f.getFlightId())) {
+                if (f.getFlightId() < 0) {
+                    availableSeats.put(f.getFlightId(), 99L);
+                } else if (!availableSeats.containsKey(f.getFlightId())) {
                     long avail = seatService.countAvailableSeatsByFlightId(f.getFlightId());
                     availableSeats.put(f.getFlightId(), avail);
                 }
@@ -115,6 +120,36 @@ public class FlightService {
         return flights;
     }
 
+    private List<Flight> mapAmadeusToFlights(com.amadeus.resources.FlightOfferSearch[] offers, Airport origin, Airport destination) {
+        java.util.ArrayList<Flight> flights = new java.util.ArrayList<>();
+        if (offers == null) return flights;
+
+        for (int i = 0; i < offers.length; i++) {
+            com.amadeus.resources.FlightOfferSearch offer = offers[i];
+            Flight flight = new Flight();
+            flight.setFlightId(-(i + 1000)); 
+            
+            com.amadeus.resources.FlightOfferSearch.Itinerary itinerary = offer.getItineraries()[0];
+            com.amadeus.resources.FlightOfferSearch.SearchSegment firstSegment = itinerary.getSegments()[0];
+            com.amadeus.resources.FlightOfferSearch.SearchSegment lastSegment = itinerary.getSegments()[itinerary.getSegments().length - 1];
+
+            flight.setFlightNumber(firstSegment.getCarrierCode() + firstSegment.getNumber());
+            flight.setAirline(firstSegment.getCarrierCode());
+            flight.setDepartureAirport(origin);
+            flight.setArrivalAirport(destination);
+            
+            flight.setDepartureTime(LocalDateTime.parse(firstSegment.getDeparture().getAt()));
+            flight.setArrivalTime(LocalDateTime.parse(lastSegment.getArrival().getAt()));
+            
+            double priceInEur = Double.parseDouble(offer.getPrice().getTotal());
+            double exchangeRate = 30000.0; 
+            flight.setPrice(priceInEur * exchangeRate);
+            
+            flights.add(flight);
+        }
+        return flights;
+    }
+
     public Map<String, Object> processFlightSearch(Integer departureAirportId, Integer arrivalAirportId, String departureDate, String tripType, String returnDate) {
         Map<String, Object> results = new HashMap<>();
         DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -126,14 +161,25 @@ public class FlightService {
         List<Flight> returnFlights = null;
 
         if (departureDate.isEmpty()) {
-            flights = findAllFlightsByCurrentDate(departureAirportId, arrivalAirportId);
+            flights = new java.util.ArrayList<>();
+            departureDate = LocalDate.now().format(inputFormatter);
         } else {
-            try {
-                LocalDate localDate = LocalDate.parse(departureDate, inputFormatter);
-                flights = findAllFlightsByDateOnly(localDate, arrivalAirportId, departureAirportId);
-            } catch (DateTimeParseException e) {
-                throw new IllegalArgumentException("Invalid date format. Please use dd-MM-yyyy.");
-            }
+            flights = new java.util.ArrayList<>();
+        }
+
+        try {
+            LocalDate localDate = LocalDate.parse(departureDate, inputFormatter);
+            
+            String amadeusDate = localDate.toString();
+            com.amadeus.resources.FlightOfferSearch[] amadeusOffers = amadeusService.searchFlights(
+                    departureAirport.getAirportCode(), 
+                    arrivalAirport.getAirportCode(), 
+                    amadeusDate, 1);
+            
+            flights = mapAmadeusToFlights(amadeusOffers, departureAirport, arrivalAirport);
+            
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Invalid date format. Please use dd-MM-yyyy.");
         }
 
         if ("roundtrip".equalsIgnoreCase(tripType)) {
@@ -141,13 +187,17 @@ public class FlightService {
             if (!returnDate.isEmpty()) {
                 try {
                     LocalDate returnLocalDate = LocalDate.parse(returnDate, inputFormatter);
-                    returnFlights = findAllFlightsByDateOnly(returnLocalDate, departureAirportId, arrivalAirportId);
+                    
+                    com.amadeus.resources.FlightOfferSearch[] returnOffers = amadeusService.searchFlights(
+                            arrivalAirport.getAirportCode(), 
+                            departureAirport.getAirportCode(), 
+                            returnLocalDate.toString(), 1);
+                    returnFlights = mapAmadeusToFlights(returnOffers, arrivalAirport, departureAirport);
+                    
                     flights = filterReturnFlights(flights, returnFlights);
                 } catch (DateTimeParseException e) {
                     throw new IllegalArgumentException("Invalid date format. Please use dd-MM-yyyy.");
                 }
-            } else {
-                returnFlights = findAllFlightsByCurrentDate(arrivalAirportId, departureAirportId);
             }
         } else {
             results.put("tripType", "oneway");

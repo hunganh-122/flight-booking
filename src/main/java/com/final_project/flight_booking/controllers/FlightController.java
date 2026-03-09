@@ -2,6 +2,7 @@ package com.final_project.flight_booking.controllers;
 
 import com.final_project.flight_booking.models.Airport;
 import com.final_project.flight_booking.models.Flight;
+import com.final_project.flight_booking.services.AirportService;
 import com.final_project.flight_booking.services.FlightService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,9 +21,12 @@ public class FlightController {
     @Autowired
     private FlightService flightService;
 
+    @Autowired
+    private AirportService airportService;
+
     @GetMapping
     public String showSearchForm(Model model) {
-        List<Airport> airports = flightService.getDistinctDepartureAirportsWithFutureFlights();
+        List<Airport> airports = airportService.findAll();
         List<Flight> flights = flightService.findAllFlightsByCurrentDateTime();
         model.addAttribute("airports", airports);
 
