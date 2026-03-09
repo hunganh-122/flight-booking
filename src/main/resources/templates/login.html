@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Đăng Nhập - Flight Booking</title>
+    <th:block th:replace="~{common/layout :: head}"></th:block>
+    <link rel="stylesheet" href="/css/toastr.min.css">
+    <style>
+        .login-container {
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 40px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .bg-body-dark {
+            background-color: #f4f7f6;
+        }
+        .login-container h2 {
+            color: #003366;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-body-dark">
+<div th:replace="~{common/layout.html :: navbar}"></div>
+
+<div class="container">
+    <div class="login-container">
+        <h2 class="text-center mb-4">Đăng Nhập</h2>
+        <form th:action="@{/login}" method="POST">
+            <div th:if="${param.error}" class="alert alert-danger mb-3" style="font-size: 0.9em;">
+                Tên đăng nhập hoặc mật khẩu không đúng!
+            </div>
+            <div th:if="${param.logout}" class="alert alert-success mb-3" style="font-size: 0.9em;">
+                Bạn đã đăng xuất thành công.
+            </div>
+            
+            <div class="mb-3">
+                <label for="username" class="form-label">Tên đăng nhập / Email</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Username hoặc Email" required autofocus>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label for="password" class="form-label">Mật khẩu</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Mật khẩu" required>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mb-4" style="font-size: 0.9em;">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="remember-me" name="remember-me">
+                    <label class="form-check-label" for="remember-me">
+                        Ghi nhớ đăng nhập
+                    </label>
+                </div>
+                <a href="#" style="color: #003366; text-decoration: none;">Quên mật khẩu?</a>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary" style="border: none; padding: 10px;">Đăng Nhập</button>
+            </div>
+            
+            <div class="text-center mt-3">
+                <span>Chưa có tài khoản? <a href="/register" style="color: #003366; text-decoration: none; font-weight: bold;">Đăng ký ngay</a></span>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div th:replace="~{common/layout.html :: footer}"></div>
+
+<script src="/js/toastr.min.js"></script>
+</body>
+</html>
