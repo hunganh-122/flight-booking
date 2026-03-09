@@ -22,7 +22,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/**", "/register", "/login", "/error", "/flights/search", "/introduction",
+                        .requestMatchers("/", "/register", "/login", "/error", "/flights/search", "/introduction",
                                 "/api/airports/arrival", "/api/otp/**", "/api/check-availability")
                         .permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/video/**").permitAll()
@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/", true)
                         .permitAll());
         return http.build();
     }

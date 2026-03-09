@@ -16,6 +16,11 @@ public class AppUserController {
     @Autowired
     private AppUserService userService;
 
+    @GetMapping("/login")
+    public String showLoginForm() {
+        return "login";
+    }
+
     @GetMapping("/register")
     public String showRegistrationForm(@ModelAttribute("user") User user) {
         return "register";
@@ -28,7 +33,7 @@ public class AppUserController {
         try {
             userService.registerNewUser(user, otpCode);
             redirectAttributes.addFlashAttribute("success", "Đăng ký tài khoản thành công!");
-            return "redirect:/register";
+            return "redirect:/login";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/register";
