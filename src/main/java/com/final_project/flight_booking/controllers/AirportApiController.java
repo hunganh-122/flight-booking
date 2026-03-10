@@ -19,7 +19,7 @@ public class AirportApiController {
     private AirportService airportService;
 
     @GetMapping("/arrival")
-    public List<Airport> getArrivalAirports(@RequestParam Integer departureAirportId) {
+    public List<Airport> getArrivalAirports(@RequestParam("departureAirportId") Integer departureAirportId) {
         return airportService.findAll().stream()
                 .filter(airport -> !airport.getAirportId().equals(departureAirportId))
                 .toList();

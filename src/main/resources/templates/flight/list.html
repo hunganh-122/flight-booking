@@ -254,16 +254,19 @@
     }
 
     function initializeSeatSelection() {
-        const seatInputs = document.querySelectorAll('#seat-modal-body .tab-pane input[type="checkbox"]:not([disabled])');
-
+        console.log('[Seat] Initializing selection logic...');
+        // Corrected selector for the new grid layout
+        const seatInputs = document.querySelectorAll('#seat-modal-body .seat input[type="checkbox"]:not([disabled])');
+        
         const seatIdsInput = document.getElementById('seat-ids');
         const selectedSeatsDisplay = document.querySelector('#seat-modal-body .selected-seats');
         const totalPriceDisplay = document.querySelector('#seat-modal-body .total-price');
         const selectedCountDisplay = document.querySelector('#seat-modal-body #selected-count');   
         const classTypeDisplay = document.querySelector('#seat-modal-body #seat-class-type');
+        const seatPriceInput = document.getElementById('seat-price');
 
         if (!seatIdsInput) {
-            console.error('Missing required elements for seat selection');
+            console.error('[Seat] Missing #seat-ids input');
             return;
         }
 
@@ -318,10 +321,17 @@
             });
 
             seatIdsInput.value = seatIds.join(',');
+            if (seatPriceInput) seatPriceInput.value = totalPrice;
 
             if (selectedCountDisplay) selectedCountDisplay.textContent = count;
-            if (selectedSeatsDisplay) selectedSeatsDisplay.textContent = (seatNumbers.length === 0) ? 'Chưa chọn ghế' : seatNumbers.join(', ');
-            if (totalPriceDisplay) totalPriceDisplay.textContent = totalPrice.toLocaleString('vi-VN') + ' VND';
+            if (selectedSeatsDisplay) {
+                if (seatNumbers.length === 0) {
+                    selectedSeatsDisplay.innerHTML = '<span class="text-muted italic">Chưa chọn ghế</span>';
+                } else {
+                    selectedSeatsDisplay.innerHTML = seatNumbers.map(num => `<span class="badge bg-primary me-1">${num}</span>`).join('');
+                }
+            }
+            if (totalPriceDisplay) totalPriceDisplay.textContent = totalPrice.toLocaleString('vi-VN') + ' ₫';
             if (classTypeDisplay) {
                 const classTypeText = classTypes.size > 0 ? Array.from(classTypes).join(', ') : '--';
                 classTypeDisplay.textContent = classTypeText;
@@ -358,105 +368,184 @@
     }
 
     async function openSeatModal(flightId, leg){
+        console.log('[Seat] openSeatModal called', { flightId, leg });
         try {
             const body = document.getElementById('seat-modal-body');
-            body.innerHTML = '<div class="text-center p-5"><div class="spinner-border" role="status"></div><p class="mt-3">Đang tải thông tin ghế...</p></div>';
+            body.innerHTML = '<div class="text-center p-5"><div class="spinner-border" role="status"></div><p class="mt-3">Đang tải sơ đồ ghế...</p></div>';
 
             await ensureBootstrapLoaded();
-            
             currentLeg = leg;
             currentFlightId = flightId;
 
-            const resp = await fetch(`/flights/${flightId}/seats`, { 
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            console.log('[Seat] Fetching /flights/' + flightId + '/seats ...');
+            const resp = await fetch(`/flights/${flightId}/seats`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
                 credentials: 'same-origin'
             });
 
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            console.log('[Seat] HTTP status:', resp.status, resp.statusText);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
 
-            const html = await resp.text();
-            const cache = document.getElementById('seat-modal-cache');
-            cache.innerHTML = html;
+            const sections = await resp.json();
+            console.log('[Seat] Received', sections.length, 'sections:', sections);
 
-            const coachTabs = cache.querySelector('.coach-tabs');
-            const tabContent = cache.querySelector('.tab-content');
-            const summary = cache.querySelector('.summary');
-            const priceInput = cache.querySelector('#seat-price');
-            const flightHidden = cache.querySelector('input[name="flightId"]');
-            const seatIdsHidden = cache.querySelector('#seat-ids');
-
-            if (!coachTabs || !tabContent) {
-                throw new Error('Không tìm thấy thông tin toa/ghế');
+            // ---- Build the UI ----
+            const styleId = 'dynamic-seat-styles';
+            if (!document.getElementById(styleId)) {
+                const style = document.createElement('style');
+                style.id = styleId;
+                style.innerHTML = `
+                    .plane-container {
+                        background: #f8f9fa;
+                        border-radius: 40px 40px 10px 10px;
+                        padding: 40px 20px;
+                        border: 2px solid #dee2e6;
+                        max-width: 500px;
+                        margin: 0 auto;
+                        box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+                    }
+                    .seat-grid {
+                        display: grid;
+                        grid-template-columns: repeat(3, 45px) 40px repeat(3, 45px);
+                        gap: 8px;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                    .row-label {
+                        text-align: center;
+                        font-weight: bold;
+                        color: #6c757d;
+                        font-size: 0.8rem;
+                    }
+                    .seat {
+                        width: 40px;
+                        height: 40px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 6px;
+                        border: 1px solid #adb5bd;
+                        background: #fff;
+                        cursor: pointer;
+                        user-select: none;
+                        font-size: 0.75rem;
+                        transition: all 0.2s;
+                    }
+                    .seat:hover:not(.occupied) {
+                        border-color: #0d6efd;
+                        background: #e7f1ff;
+                    }
+                    .seat.occupied {
+                        background: #dee2e6;
+                        border-color: #ced4da;
+                        color: #adb5bd;
+                        cursor: not-allowed;
+                    }
+                    .seat input { display: none; }
+                    .seat.selected {
+                        background: #0d6efd;
+                        border-color: #0d6efd;
+                        color: #fff;
+                    }
+                `;
+                document.head.appendChild(style);
             }
 
             const wrapper = document.createElement('div');
-            wrapper.className = 'container-fluid';
+            wrapper.className = 'container-fluid p-3';
 
-            const tabsRow = document.createElement('div');
-            tabsRow.className = 'row';
-            const tabsCol = document.createElement('div');
-            tabsCol.className = 'col-12';
-            if (coachTabs) tabsCol.appendChild(coachTabs.cloneNode(true));
-            tabsRow.appendChild(tabsCol);
+            // Render all seats without any section/deck headers or tabs
+            let mergedGridHtml = '';
+            sections.forEach(sec => {
+                const rowMap = {};
+                sec.seats.forEach(s => {
+                    const rowMatch = s.number.match(/^(\d+)/);
+                    const rowNum = rowMatch ? rowMatch[1] : '0';
+                    if (!rowMap[rowNum]) rowMap[rowNum] = {};
+                    const colMatch = s.number.match(/([A-Z])$/);
+                    const colLetter = colMatch ? colMatch[1] : 'X';
+                    rowMap[rowNum][colLetter] = s;
+                });
 
-            // Row 2: Seat grid (left) + Summary (right)
-            const contentRow = document.createElement('div');
-            contentRow.className = 'row';
+                const sortedRowKeys = Object.keys(rowMap).sort((a, b) => parseInt(a) - parseInt(b));
+                sortedRowKeys.forEach(rowKey => {
+                    const rowSeats = rowMap[rowKey];
+                    const cols = ['A', 'B', 'C', 'AISLE', 'D', 'E', 'F'];
+                    cols.forEach(col => {
+                        if (col === 'AISLE') {
+                            mergedGridHtml += `<div class="row-label">${rowKey}</div>`;
+                        } else {
+                            const s = rowSeats[col];
+                            if (s) {
+                                const avail = s.status === 'AVAILABLE';
+                                const priceVnd = Number(s.price).toLocaleString('vi-VN');
+                                mergedGridHtml += `
+                                    <div class="seat ${!avail ? 'occupied' : ''}" 
+                                         title="${s.number} - ${s.classType} - ${priceVnd}₫">
+                                        <input type="checkbox" id="seat-${s.id}"
+                                               ${!avail ? 'disabled' : ''}
+                                               data-seat-id="${s.id}"
+                                               data-seat-number="${s.number}"
+                                               data-seat-price="${s.price}"
+                                               data-class-type="${s.classType}" />
+                                        <label for="seat-${s.id}" style="cursor:inherit">${col}</label>
+                                    </div>`;
+                            } else { mergedGridHtml += `<div></div>`; }
+                        }
+                    });
+                });
+            });
 
-            const leftCol = document.createElement('div');
-            leftCol.className = 'col-xl-8 col-lg-12 p-3';
-            if (tabContent) leftCol.appendChild(tabContent.cloneNode(true));
+            const summaryHtml = `
+                <div class="summary p-3 border rounded shadow-sm">
+                    <h5 class="fw-bold mb-3">Tóm tắt hành trình</h5>
+                    <p><strong>Loại ghế:</strong> <span id="seat-class-type">--</span></p>
+                    <p><strong>Số ghế đã chọn:</strong> <span id="selected-count">0</span></p>
+                    <p><strong>Mã ghế:</strong> <span class="selected-seats text-primary">Chưa chọn ghế</span></p>
+                    <hr>
+                    <p><strong>Tổng tiền:</strong> <span class="total-price text-danger fs-5 fw-bold">0 VND</span></p>
+                    <input type="hidden" id="seat-price" value="0">
+                    <input type="hidden" name="flightId" value="${flightId}">
+                    <input type="hidden" id="seat-ids" name="seatIds">
+                </div>`;
 
-            const rightCol = document.createElement('div');
-            rightCol.className = 'col-xl-4 col-lg-12 p-3';
-
-            if (summary) {
-                const summaryClone = summary.cloneNode(true);
-                const payForm = summaryClone.querySelector('form[action="/pay"]');
-                if (payForm) payForm.remove();
-                rightCol.appendChild(summaryClone);
-            }
-
-            if (priceInput) rightCol.appendChild(priceInput.cloneNode(true));
-            if (flightHidden) rightCol.appendChild(flightHidden.cloneNode(true));
-            if (seatIdsHidden) rightCol.appendChild(seatIdsHidden.cloneNode(true));
-
-            contentRow.appendChild(leftCol);
-            contentRow.appendChild(rightCol);
-
-            wrapper.appendChild(tabsRow);
-            wrapper.appendChild(contentRow);
+            wrapper.innerHTML = `
+                <div class="row">
+                    <div class="col-xl-8 col-12">
+                        <div class="plane-container shadow-sm mb-4">
+                            <div class="bus-steering text-center mb-4 text-muted">
+                                <i class="fa-solid fa-plane-up fa-2xl"></i><br>
+                                <small class="text-uppercase fw-bold">Mũi máy bay</small>
+                            </div>
+                            <div class="seat-grid">${mergedGridHtml}</div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-12">${summaryHtml}</div>
+                </div>`;
 
             body.innerHTML = '';
             body.appendChild(wrapper);
+            console.log('[Seat] Modal HTML injected ✓');
 
             const title = document.getElementById('seat-modal-title');
             const confirmBtn = document.getElementById('confirm-seat-selection');
             const meta = document.getElementById('search-meta');
             const isRT = meta && meta.dataset.tripType === 'roundtrip';
 
-            if (title) {
-                title.textContent = leg === 'return' ? 'Chọn ghế - Chiều về' : 'Chọn ghế - Chiều đi';
-            }
-            if (confirmBtn) {
-                confirmBtn.textContent = (isRT && leg === 'outbound') ? 'Chọn chuyến về' : 'Tiến hành thanh toán';
-            }
+            if (title) title.textContent = leg === 'return' ? 'Chọn ghế - Chiều về' : 'Chọn ghế - Chiều đi';
+            if (confirmBtn) confirmBtn.textContent = (isRT && leg === 'outbound') ? 'Chọn chuyến về' : 'Tiến hành thanh toán';
 
             initializeBootstrapTabs();
             initializeSeatSelection();
-
             ensureModal().show();
+            console.log('[Seat] Modal shown ✓');
 
         } catch (error) {
-            console.error('Error loading seat modal:', error);
+            console.error('[Seat] Error loading seat modal:', error);
             if (window.Swal) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi',
-                    text: 'Không thể tải thông tin ghế. Vui lòng thử lại.'
-                });
+                Swal.fire({ icon: 'error', title: 'Lỗi tải ghế', text: error.message || 'Vui lòng thử lại.' });
             } else {
-                alert('Lỗi tải dữ liệu ghế.');
+                alert('Lỗi: ' + error.message);
             }
         }
     }
