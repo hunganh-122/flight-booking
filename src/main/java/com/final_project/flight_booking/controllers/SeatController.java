@@ -34,7 +34,7 @@ public class SeatController {
 
         if (jsonRaw == null || jsonRaw.trim().isEmpty()) {
             logger.warn("No seat map data returned from Amadeus for flightId={}", flightId);
-            return ResponseEntity.ok(buildFallbackSeats());
+            return ResponseEntity.status(404).body(Collections.singletonMap("error", "Không tìm thấy thông tin chỗ ngồi từ Amadeus"));
         }
 
         try {
@@ -43,7 +43,7 @@ public class SeatController {
             return ResponseEntity.ok(sections);
         } catch (Exception e) {
             logger.error("Error parsing seat map for flightId={}: {}", flightId, e.getMessage(), e);
-            return ResponseEntity.ok(buildFallbackSeats());
+            return ResponseEntity.status(500).body(Collections.singletonMap("error", "Lỗi xử lý dữ liệu chỗ ngồi"));
         }
     }
 
@@ -120,27 +120,4 @@ public class SeatController {
         return sections;
     }
 
-    private List<Map<String, Object>> buildFallbackSeats() {
-        List<Map<String, Object>> sections = new ArrayList<>();
-        String[] rows = {"A","B","C","D","E","F"};
-        for (int sec = 1; sec <= 2; sec++) {
-            List<Map<String, Object>> seatList = new ArrayList<>();
-            for (int r = 1; r <= 5; r++) {
-                for (String col : rows) {
-                    Map<String, Object> seat = new HashMap<>();
-                    seat.put("id", sec * 1000 + r * 10 + col.charAt(0));
-                    seat.put("number", r + col);
-                    seat.put("classType", sec == 1 ? "Business" : "Economy");
-                    seat.put("status", "AVAILABLE");
-                    seat.put("price", sec == 1 ? 3000000L : 1000000L);
-                    seatList.add(seat);
-                }
-            }
-            Map<String, Object> section = new LinkedHashMap<>();
-            section.put("name", "Khoang " + sec);
-            section.put("seats", seatList);
-            sections.add(section);
-        }
-        return sections;
-    }
 }

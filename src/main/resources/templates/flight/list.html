@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/css/seat-re.css">
 </head>
 <body>
+<th:block th:replace="~{/common/layout :: loading}"></th:block>
 <th:block th:replace="~{/common/layout :: navbar}"></th:block>
 <!-- file.list.html -->
 <div class="container pt-5">
@@ -369,6 +370,7 @@
 
     async function openSeatModal(flightId, leg){
         console.log('[Seat] openSeatModal called', { flightId, leg });
+        showLoading();
         try {
             const body = document.getElementById('seat-modal-body');
             body.innerHTML = '<div class="text-center p-5"><div class="spinner-border" role="status"></div><p class="mt-3">Đang tải sơ đồ ghế...</p></div>';
@@ -547,6 +549,8 @@
             } else {
                 alert('Lỗi: ' + error.message);
             }
+        } finally {
+            hideLoading();
         }
     }
 
