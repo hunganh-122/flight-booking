@@ -146,6 +146,7 @@ public class FlightService {
             flight.setPrice(priceInEur * exchangeRate);
             
             flights.add(flight);
+            amadeusService.cacheOffer(flight.getFlightId(), offer);
         }
         return flights;
     }

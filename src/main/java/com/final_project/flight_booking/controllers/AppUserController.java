@@ -52,7 +52,7 @@ public class AppUserController {
 
     @PostMapping("/api/otp/send")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> sendOtp(@RequestParam String email) {
+    public ResponseEntity<Map<String, Object>> sendOtp(@RequestParam("email") String email) {
         return ResponseEntity.ok(userService.processOtpSending(email));
     }
 }

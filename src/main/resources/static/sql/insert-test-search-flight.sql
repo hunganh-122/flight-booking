@@ -27,4 +27,7 @@ INSERT INTO airports (airport_code, airport_name, city, country) VALUES
 ('UIH', 'Sân bay Phù Cát', 'Bình Định', 'Việt Nam'),
 ('VCA', 'Sân bay Quốc tế Cần Thơ', 'Cần Thơ', 'Việt Nam'),
 ('VDH', 'Sân bay Đồng Hới', 'Quảng Bình', 'Việt Nam'),
-('THD', 'Sân bay Thọ Xuân', 'Thanh Hóa', 'Việt Nam');
+('THD', 'Sân bay Thọ Xuân', 'Thanh Hóa', 'Việt Nam'),
+('LHR', 'Sân bay Quốc tế Heathrow', 'London', 'Anh'),
+('MAD', 'Sân bay Quốc tế Adolfo Suárez', 'Madrid', 'Tây Ban Nha');
+

@@ -1,0 +1,63 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div class="row">
+    <div class="col-md-8">
+        <ul class="nav nav-pills coach-tabs mb-3" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation" th:each="coachEntry, stat : ${seatsByCoach}">
+                <button class="nav-link" th:classappend="${stat.first} ? 'active'"
+                        th:id="'pills-coach-' + ${coachEntry.key} + '-tab'" data-bs-toggle="pill"
+                        th:data-bs-target="'#pills-coach-' + ${coachEntry.key}" type="button" role="tab">
+                    Toa [[${coachEntry.key}]]
+                </button>
+            </li>
+        </ul>
+        <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade" th:classappend="${stat.first} ? 'show active'"
+                 th:each="coachEntry, stat : ${seatsByCoach}" 
+                 th:id="'pills-coach-' + ${coachEntry.key}" role="tabpanel">
+                <div class="seat-container d-flex flex-column align-items-center">
+                    <ul class="showcase">
+                        <li><div class="seat"></div><small>N/A</small></li>
+                        <li><div class="seat selected"></div><small>Đã chọn</small></li>
+                        <li><div class="seat occupied"></div><small>Hết chỗ</small></li>
+                    </ul>
+                    <div class="plane-body">
+                        <div class="bus-steering text-center mb-3">Tài xế / Lái chính</div>
+                        <div class="seats-rows d-flex justify-content-center">
+                            <div th:each="rowSeats, rowStat : ${coachEntry.value}" 
+                                 th:class="${rowStat.index == 2 ? 'seat-row ms-5' : 'seat-row me-2'}">
+                                <ol class="seats list-unstyled">
+                                    <li class="seat" th:each="seat : ${rowSeats}"
+                                        th:classappend="${seat.availabilityStatus != 'AVAILABLE'} ? 'occupied' : ''">
+                                        <input type="checkbox" th:id="${seat.seatId}"
+                                               th:disabled="${seat.availabilityStatus != 'AVAILABLE'}"
+                                               th:data-seat-id="${seat.seatId}"
+                                               th:data-seat-number="${seat.seatNumber}"
+                                               th:data-seat-price="${seat.price}"
+                                               th:data-class-type="${seat.classType}" />
+                                        <label th:for="${seat.seatId}" th:text="${seat.seatNumber}"></label>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="summary p-3 border rounded shadow-sm">
+            <h4 class="fw-bold mb-3">Tóm tắt hành trình</h4>
+            <p><strong>Loại ghế:</strong> <span id="seat-class-type">--</span></p>
+            <p><strong>Số ghế đã chọn:</strong> <span id="selected-count">0</span></p>
+            <p><strong>Mã ghế:</strong> <span class="selected-seats text-primary">Chưa chọn ghế</span></p>
+            <hr align="center">
+            <p><strong>Tổng tiền:</strong> <span class="total-price text-danger fs-5 fw-bold">0 VND</span></p>
+            
+            <input type="hidden" id="seat-price" th:value="${seatPrice}">
+            <input type="hidden" name="flightId" th:value="${flightId}">
+            <input type="hidden" id="seat-ids" name="seatIds">
+        </div>
+    </div>
+</div>
+</html>
