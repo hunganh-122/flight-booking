@@ -1,7 +1,7 @@
 package com.final_project.flight_booking.controllers;
 
 import com.final_project.flight_booking.models.Airport;
-import com.final_project.flight_booking.services.FlightService;
+import com.final_project.flight_booking.services.AirportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,10 +16,12 @@ import java.util.List;
 public class AirportApiController {
 
     @Autowired
-    private FlightService flightService;
+    private AirportService airportService;
 
     @GetMapping("/arrival")
     public List<Airport> getArrivalAirports(@RequestParam Integer departureAirportId) {
-        return flightService.getArrivalAirportsByDeparture(departureAirportId, LocalDateTime.now());
+        return airportService.findAll().stream()
+                .filter(airport -> !airport.getAirportId().equals(departureAirportId))
+                .toList();
     }
 }
