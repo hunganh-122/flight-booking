@@ -32,6 +32,25 @@
 </head>
 
 <body>
+<div th:fragment="loading">
+    <div id="global-loading" style="display: none;">
+        <div class="simple-spinner"></div>
+    </div>
+    <script>
+        function showLoading() {
+            document.getElementById('global-loading').style.display = 'flex';
+        }
+        function hideLoading() {
+            document.getElementById('global-loading').style.display = 'none';
+        }
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                hideLoading();
+            }
+        };
+    </script>
+</div>
+
 <!--Nav-->
 
 <th:block th:fragment="navbar">

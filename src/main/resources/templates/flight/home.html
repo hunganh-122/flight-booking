@@ -16,6 +16,7 @@
 
     </head>
     <body class="bg-body-dark">
+    <div th:replace="common/layout.html :: loading"></div>
     <div th:replace="common/layout.html :: navbar"></div>
 
         <div id="carouselExampleInterval" class="carousel slide carousel-fade pt-5" data-bs-ride="carousel" data-bs-pause="false">
@@ -177,6 +178,11 @@
 
     
     <script src="/js/home.js"></script>
+    <script>
+        document.getElementById('form-search').addEventListener('submit', function() {
+            showLoading();
+        });
+    </script>
     <script th:inline="javascript">
         let messageWarning = [[${messageWarning}]];
 
