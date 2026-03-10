@@ -23,7 +23,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/", "/register", "/login", "/error", "/flights/search", "/introduction",
-                                "/api/airports/arrival", "/api/otp/**", "/api/check-availability")
+                                "/api/airports/arrival", "/api/otp/**", "/api/check-availability", "/api/ai/**")
                         .permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/video/**").permitAll()
                         .anyRequest().authenticated())
