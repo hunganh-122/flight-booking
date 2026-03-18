@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết Quả Thanh Toán | Flight Booking</title>
+    <th:block th:replace="~{/common/layout :: head}"></th:block>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --secondary-blue: #0d47a1;
+            --accent-yellow: #ffcc00;
+            --bg-gradient: linear-gradient(135deg, #0d47a1 0%, #42a5f5 100%);
+            --card-bg: rgba(255, 255, 255, 0.96);
+            --text-dark: #333333;
+            --success: #28a745;
+            --danger: #dc3545;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .page-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+            margin-top: 80px;
+        }
+
+        .result-hero {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #fff;
+        }
+        .result-icon {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 3rem;
+            background: #fff;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .result-icon.success { color: var(--success); }
+        .result-icon.fail { color: var(--danger); }
+
+        .card-panel {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            border: none;
+            margin-bottom: 25px;
+        }
+        .card-panel-header {
+            padding: 15px 25px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #eee;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .card-panel-header h3 { font-size: 1.1rem; font-weight: 700; color: var(--primary-blue); margin: 0; }
+        .card-panel-body { padding: 25px; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .info-item { display: flex; flex-direction: column; gap: 2px; }
+        .info-label { font-size: 12px; color: #777; font-weight: 500; text-transform: uppercase; }
+        .info-value { font-size: 15px; font-weight: 600; color: var(--primary-blue); }
+        .highlight { color: #d32f2f; font-size: 1.3rem; font-weight: 800; }
+
+        .action-buttons {
+            display: flex; gap: 15px; justify-content: center; margin-top: 30px;
+        }
+        .btn-action {
+            padding: 12px 25px; border-radius: 8px; font-weight: 700; text-decoration: none;
+            transition: 0.3s; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-home { background: var(--accent-yellow); color: var(--primary-blue); }
+        .btn-home:hover { background: #f5b800; transform: translateY(-2px); }
+        .btn-mybookings { background: #fff; color: var(--primary-blue); border: 2px solid var(--primary-blue); }
+        .btn-mybookings:hover { background: #f0f4f8; transform: translateY(-2px); }
+
+        @media (max-width: 600px) {
+            .info-grid { grid-template-columns: 1fr; }
+            .action-buttons { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<th:block th:replace="~{/common/layout :: loading}"></th:block>
+<th:block th:replace="~{/common/layout :: navbar}"></th:block>
+
+<div class="page-container">
+    <div class="result-hero">
+        <div th:if="${success}" class="result-icon success">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div th:unless="${success}" class="result-icon fail">
+            <i class="fas fa-times-circle"></i>
+        </div>
+        
+        <h1 class="fw-bold" th:text="${success} ? 'Thanh Toán Thành Công!' : 'Thanh Toán Thất Bại'">Kết Quả</h1>
+        <p class="opacity-75" th:text="${success} ? 'Cảm ơn bạn đã tin dùng dịch vụ của chúng tôi.' : 'Giao dịch không thành công. Vui lòng kiểm tra lại.'"></p>
+    </div>
+
+    <div class="card-panel">
+        <div class="card-panel-header">
+            <h3>Chi tiết giao dịch</h3>
+        </div>
+        <div class="card-panel-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Mã vận đơn</span>
+                    <span class="info-value" th:text="${txnRef}">---</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Ngân hàng</span>
+                    <span class="info-value" th:text="${bankCode ?: '--'}">--</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Trạng thái</span>
+                    <span class="info-value" th:text="${success ? 'Thành công' : 'Thất bại'}" 
+                          th:style="'color:' + (${success} ? 'var(--success)' : 'var(--danger)')">Thành công</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Số tiền</span>
+                    <span class="info-value highlight" th:text="${#numbers.formatDecimal(amountVnd ?: 0, 0, 'COMMA', 0, 'POINT') + ' ₫'}">0 ₫</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-panel" th:if="${success}">
+        <div class="card-panel-header">
+            <h3>Hành khách & Chuyến bay</h3>
+        </div>
+        <div class="card-panel-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Họ tên</span>
+                    <span class="info-value" th:text="${passengerName ?: '--'}">--</span>
+                </div>
+                <th:block th:if="${!isRoundTrip}">
+                    <div class="info-item">
+                        <span class="info-label">Số hiệu</span>
+                        <span class="info-value" th:text="${flight?.flightNumber ?: '--'}">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Ghế</span>
+                        <span class="info-value" th:text="${seatNumbers != null ? #strings.listJoin(seatNumbers, ', ') : '--'}">--</span>
+                    </div>
+                </th:block>
+                <th:block th:if="${isRoundTrip}">
+                    <div class="info-item">
+                        <span class="info-label">Chiều đi</span>
+                        <span class="info-value" th:text="${outboundFlight?.flightNumber + ': ' + (outboundSeatNumbers != null ? #strings.listJoin(outboundSeatNumbers, ', ') : '')}">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Chiều về</span>
+                        <span class="info-value" th:text="${returnFlight?.flightNumber + ': ' + (returnSeatNumbers != null ? #strings.listJoin(returnSeatNumbers, ', ') : '')}">--</span>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <a href="/" class="btn-action btn-home">
+            <i class="fas fa-home"></i> Về Trang Chủ
+        </a>
+        <a href="/my-bookings" class="btn-action btn-mybookings" sec:authorize="isAuthenticated()">
+            <i class="fas fa-list-ul"></i> Vé của tôi
+        </a>
+        <a th:unless="${success}" href="/" class="btn-action btn-mybookings">
+            <i class="fas fa-redo"></i> Thử lại
+        </a>
+    </div>
+</div>
+
+<th:block th:replace="~{/common/layout :: footer}"></th:block>
+</body>
+</html>
