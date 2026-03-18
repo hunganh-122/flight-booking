@@ -55,7 +55,10 @@ public class Booking {
     @Column(length = 100)
     private String email;
 
-    @Column(length = 6)
+    @Column(length = 50)
     private String codeBooking;
+
+    @Column(length = 20)
+    private String classType;
 }
 

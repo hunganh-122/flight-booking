@@ -15,6 +15,8 @@ import java.util.List;
 
 @Repository
 public interface FlightRepository extends JpaRepository<Flight, Integer> {
+    java.util.Optional<Flight> findByFlightNumberAndDepartureTime(String flightNumber, LocalDateTime departureTime);
+
     @Query("SELECT f FROM Flight f WHERE FUNCTION('DATE', f.departureTime) = :localDate AND f.arrivalAirport.airportId = :arrivalAirportId AND f.departureAirport.airportId = :departureAirportId AND f.departureTime > :currentDateTime")
     List<Flight> findFlights(
             @Param("localDate") LocalDate localDate,
@@ -36,11 +38,11 @@ public interface FlightRepository extends JpaRepository<Flight, Integer> {
     );
 
     @Query("SELECT DISTINCT a FROM Flight f JOIN Airport a ON f.departureAirport.airportId = a.airportId WHERE f.departureTime > :currentTime")
-    List<Airport> findDistinctDepartureAirportsWithFutureFlights(LocalDateTime currentTime);
+    List<Airport> findDistinctDepartureAirportsWithFutureFlights(@Param("currentTime") LocalDateTime currentTime);
 
     @Query("SELECT DISTINCT a FROM Flight f JOIN Airport a ON f.arrivalAirport.airportId = a.airportId " +
             "WHERE f.departureAirport.airportId = :departureAirportId AND f.departureTime > :currentTime")
-    List<Airport> findArrivalAirportsByDeparture(Integer departureAirportId, LocalDateTime currentTime);
+    List<Airport> findArrivalAirportsByDeparture(@Param("departureAirportId") Integer departureAirportId, @Param("currentTime") LocalDateTime currentTime);
 
     @Query("SELECT f FROM Flight f WHERE f.departureAirport.airportId = :departureAirportId " +
             "AND f.arrivalAirport.airportId = :arrivalAirportId " +
