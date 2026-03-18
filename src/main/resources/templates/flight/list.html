@@ -585,10 +585,17 @@
         const seatIds = seatIdsInput.value.split(',').map(s => s.trim()).filter(Boolean);
         const seatPrice = document.getElementById('seat-price')?.value || 0;
 
+        // Lấy seat numbers từ badge hiển thị trong modal
+        const seatNumberEls = document.querySelectorAll('#seat-modal-body .selected-seats .badge');
+        const seatNumbers = Array.from(seatNumberEls).map(el => el.textContent.trim());
+        const classType = document.getElementById('seat-class-type')?.textContent?.trim() || '';
+
         selection[currentLeg] = { 
             flightId: currentFlightId, 
-            seatIds: seatIds, 
-            seatPrice: parseFloat(seatPrice)
+            seatIds: seatIds,
+            seatNumbers: seatNumbers,
+            seatPrice: parseFloat(seatPrice),
+            classType: classType
         };
         
         ensureModal().hide();
@@ -613,28 +620,47 @@
     function submitPayment(leg) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '/pay';
+        form.action = '/passenger-info';
+
+        function addHidden(name, value) {
+            const i = document.createElement('input');
+            i.type = 'hidden'; i.name = name; i.value = value;
+            form.appendChild(i);
+        }
+
+        // Lấy thông tin ghế từ modal summary
+        function collectSeatInfo(sel) {
+            const seatNumberEls = document.querySelectorAll('#seat-modal-body .selected-seats .badge');
+            const seatNumbers = Array.from(seatNumberEls).map(el => el.textContent.trim());
+            const totalPrice = document.getElementById('seat-price')?.value || 0;
+            const classType  = document.getElementById('seat-class-type')?.textContent?.trim() || '';
+            return { seatNumbers, totalPrice, classType };
+        }
 
         if (leg === 'both') {
             const out = selection.outbound;
             const ret = selection.return;
             if (!out || !ret) return;
 
-            const of = document.createElement('input'); of.type = 'hidden'; of.name = 'outboundFlightId'; of.value = out.flightId; form.appendChild(of);
-            out.seatIds.forEach(id => { const i = document.createElement('input'); i.type = 'hidden'; i.name = 'outboundSeatIds'; i.value = id; form.appendChild(i); });
-            const rf = document.createElement('input'); rf.type = 'hidden'; rf.name = 'returnFlightId'; rf.value = ret.flightId; form.appendChild(rf);
-            ret.seatIds.forEach(id => { const i = document.createElement('input'); i.type = 'hidden'; i.name = 'returnSeatIds'; i.value = id; form.appendChild(i); });
+            addHidden('outboundFlightId', out.flightId);
+            out.seatIds.forEach(id => addHidden('outboundSeatIds', id));
+            out.seatNumbers.forEach(n => addHidden('outboundSeatNumbers', n));
+            addHidden('outboundTotalPrice', out.seatPrice);
+            addHidden('outboundClassType', out.classType || '');
+
+            addHidden('returnFlightId', ret.flightId);
+            ret.seatIds.forEach(id => addHidden('returnSeatIds', id));
+            ret.seatNumbers.forEach(n => addHidden('returnSeatNumbers', n));
+            addHidden('returnTotalPrice', ret.seatPrice);
+            addHidden('returnClassType', ret.classType || '');
         } else {
             const data = selection[leg];
             if (!data) return;
-            const flightInput = document.createElement('input');
-            flightInput.type = 'hidden'; flightInput.name = 'flightId'; flightInput.value = data.flightId;
-            form.appendChild(flightInput);
-            data.seatIds.forEach(id => {
-                const seatInput = document.createElement('input');
-                seatInput.type = 'hidden'; seatInput.name = 'seatIds'; seatInput.value = id;
-                form.appendChild(seatInput);
-            });
+            addHidden('flightId', data.flightId);
+            data.seatIds.forEach(id => addHidden('seatIds', id));
+            data.seatNumbers.forEach(n => addHidden('seatNumbers', n));
+            addHidden('totalPrice', data.seatPrice);
+            addHidden('classType', data.classType || '');
         }
 
         document.body.appendChild(form);

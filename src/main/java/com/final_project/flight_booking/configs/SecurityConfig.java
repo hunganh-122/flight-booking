@@ -23,7 +23,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/", "/register", "/login", "/error", "/flights/search", "/introduction",
-                                "/flights/*/seats", "/api/airports/arrival", "/api/otp/**", "/api/check-availability", "/api/ai/**")
+                                "/flights/*/seats", "/api/airports/arrival", "/api/otp/**", "/api/check-availability", "/api/ai/**",
+                                "/passenger-info", "/booking/proceed-payment", "/payment/vnpay-return")
                         .permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/video/**").permitAll()
                         .anyRequest().authenticated())
