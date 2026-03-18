@@ -6,7 +6,9 @@ import com.final_project.flight_booking.repositories.FlightRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
 import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -32,11 +34,46 @@ public class FlightService {
     private AmadeusService amadeusService;
 
     public Flight getFlightById(Integer flightId) {
+        if (flightId == null) return null;
+        if (flightId < 0) {
+            com.amadeus.resources.FlightOfferSearch offer = amadeusService.getOfferFromCache(flightId);
+            if (offer != null) {
+                return mapAmadeusOfferToFlight(offer, flightId);
+            }
+            return null;
+        }
         return flightRepository.findById(flightId).orElse(null);
     }
 
     public Flight findById(int flightId) {
-        return flightRepository.findById(flightId).orElse(null);
+        return getFlightById(flightId);
+    }
+
+    private Flight mapAmadeusOfferToFlight(com.amadeus.resources.FlightOfferSearch offer, int flightId) {
+        Flight flight = new Flight();
+        flight.setFlightId(flightId);
+
+        com.amadeus.resources.FlightOfferSearch.Itinerary itinerary = offer.getItineraries()[0];
+        com.amadeus.resources.FlightOfferSearch.SearchSegment firstSegment = itinerary.getSegments()[0];
+        com.amadeus.resources.FlightOfferSearch.SearchSegment lastSegment = itinerary.getSegments()[itinerary.getSegments().length - 1];
+
+        flight.setFlightNumber(firstSegment.getCarrierCode() + firstSegment.getNumber());
+        flight.setAirline(firstSegment.getCarrierCode());
+        
+        Airport origin = airportService.findByAirportCode(firstSegment.getDeparture().getIataCode());
+        Airport destination = airportService.findByAirportCode(lastSegment.getArrival().getIataCode());
+        
+        flight.setDepartureAirport(origin);
+        flight.setArrivalAirport(destination);
+        
+        flight.setDepartureTime(LocalDateTime.parse(firstSegment.getDeparture().getAt()));
+        flight.setArrivalTime(LocalDateTime.parse(lastSegment.getArrival().getAt()));
+        
+        double priceInEur = Double.parseDouble(offer.getPrice().getTotal());
+        double exchangeRate = 30000.0; 
+        flight.setPrice(priceInEur * exchangeRate);
+        
+        return flight;
     }
 
     public List<Flight> findAllFlights(LocalDate localDate, Integer arrivalAirportId, Integer departureAirportId) {
@@ -222,5 +259,14 @@ public class FlightService {
         results.put("returnDate", returnDate);
 
         return results;
+    }
+    @Transactional
+    public Flight saveFlightFromAmadeus(Flight f) {
+        if (f == null) return null;
+        return flightRepository.findByFlightNumberAndDepartureTime(f.getFlightNumber(), f.getDepartureTime())
+                .orElseGet(() -> {
+                    f.setFlightId(null);
+                    return flightRepository.save(f);
+                });
     }
 }

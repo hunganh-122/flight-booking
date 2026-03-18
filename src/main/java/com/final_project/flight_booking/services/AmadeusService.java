@@ -67,6 +67,10 @@ public class AmadeusService {
         }
     }
 
+    public FlightOfferSearch getOfferFromCache(int flightId) {
+        return offerCache.get(flightId);
+    }
+
     public void cacheOffer(int flightId, FlightOfferSearch offer) {
         offerCache.put(flightId, offer);
         logger.info("Cached FlightOfferSearch for flightId={}. Cache now has {} entries: {}",

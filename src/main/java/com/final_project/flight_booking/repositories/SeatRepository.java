@@ -21,20 +21,20 @@ public interface SeatRepository extends JpaRepository<Seat, Integer> {
     @Modifying
     @Transactional
     @Query("UPDATE Seat s SET s.availabilityStatus = :status, s.holdExpiration = :holdExpiration WHERE s.seatId = :seatId")
-    void updateSeatStatus(Integer seatId, String status, LocalDateTime holdExpiration);
+    void updateSeatStatus(@Param("seatId") Integer seatId, @Param("status") String status, @Param("holdExpiration") LocalDateTime holdExpiration);
 
     @Modifying
     @Transactional
     @Query("UPDATE Seat s SET s.availabilityStatus = :status WHERE s.seatId = :seatId")
-    void updateSeatStatusConfig(Integer seatId, String status);
+    void updateSeatStatusConfig(@Param("seatId") Integer seatId, @Param("status") String status);
 
     @Modifying
     @Transactional
     @Query("UPDATE Seat s SET s.availabilityStatus = 'AVAILABLE', s.holdExpiration = NULL WHERE s.availabilityStatus like 'BOOKED%' AND s.holdExpiration < :now")
-    void updateSeatsToAvailableIfExpired(LocalDateTime now);
+    void updateSeatsToAvailableIfExpired(@Param("now") LocalDateTime now);
 
     @Query("SELECT COUNT(s) FROM Seat s WHERE s.flight.flightId = :flightId AND s.availabilityStatus = 'AVAILABLE'")
-    long countAvailableSeatsByFlightId(Integer flightId);
+    long countAvailableSeatsByFlightId(@Param("flightId") Integer flightId);
 
     @Query("SELECT MIN(s.price) FROM Seat s WHERE s.flight.flightId = :flightId")
     Double findMinPriceByFlightId(@Param("flightId") Integer flightId);

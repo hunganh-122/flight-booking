@@ -1,16 +1,21 @@
 package com.final_project.flight_booking.controllers;
 
-import com.final_project.flight_booking.models.Flight;
+import com.final_project.flight_booking.models.*;
+import com.final_project.flight_booking.repositories.*;
 import com.final_project.flight_booking.services.FlightService;
+import com.final_project.flight_booking.services.MailService;
 import com.final_project.flight_booking.services.VNPayService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Controller
@@ -21,6 +26,21 @@ public class BookingController {
 
     @Autowired
     private VNPayService vnPayService;
+
+    @Autowired
+    private BookingRepository bookingRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
+    private PayMethodRepository payMethodRepository;
+
+    @Autowired
+    private MailService mailService;
+
+    @Autowired
+    private AppUserRepository userRepository;
 
     @PostMapping("/passenger-info")
     public String showPassengerInfo(
@@ -135,6 +155,7 @@ public class BookingController {
         return "redirect:" + paymentUrl;
     }
 
+    @SuppressWarnings("unchecked")
     @GetMapping("/payment/vnpay-return")
     public String vnpayReturn(
             @RequestParam Map<String, String> params,
@@ -175,6 +196,10 @@ public class BookingController {
         model.addAttribute("passengerCountry",passengerCountry);
         model.addAttribute("isRoundTrip",     roundTrip);
 
+        Flight outboundF = null;
+        Flight returnF   = null;
+        Flight oneWayF   = null;
+
         if (roundTrip != null && roundTrip) {
             model.addAttribute("outboundSeatNumbers", session.getAttribute("booking_outboundSeatNumbers"));
             model.addAttribute("returnSeatNumbers",   session.getAttribute("booking_returnSeatNumbers"));
@@ -183,16 +208,140 @@ public class BookingController {
             
             Integer outFid = (Integer) session.getAttribute("booking_outboundFlightId");
             Integer retFid = (Integer) session.getAttribute("booking_returnFlightId");
-            if (outFid != null) model.addAttribute("outboundFlight", flightService.getFlightById(outFid));
-            if (retFid != null) model.addAttribute("returnFlight",   flightService.getFlightById(retFid));
+            if (outFid != null) {
+                outboundF = flightService.getFlightById(outFid);
+                model.addAttribute("outboundFlight", outboundF);
+            }
+            if (retFid != null) {
+                returnF = flightService.getFlightById(retFid);
+                model.addAttribute("returnFlight", returnF);
+            }
         } else {
             model.addAttribute("seatNumbers", session.getAttribute("booking_seatNumbers"));
             model.addAttribute("classType",   session.getAttribute("booking_classType"));
             Integer fid = (Integer) session.getAttribute("booking_flightId");
-            if (fid != null) model.addAttribute("flight", flightService.getFlightById(fid));
+            if (fid != null) {
+                oneWayF = flightService.getFlightById(fid);
+                model.addAttribute("flight", oneWayF);
+            }
         }
 
         if (success) {
+            User user = null;
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (principal instanceof UserDetails) {
+                String username = ((UserDetails) principal).getUsername();
+                user = userRepository.findByUsername(username);
+            }
+
+            PayMethod vnpayMethod = payMethodRepository.findByPaymethodName("VNPay")
+                    .orElseGet(() -> {
+                        PayMethod m = new PayMethod();
+                        m.setPaymethodName("VNPay");
+                        return payMethodRepository.save(m);
+                    });
+
+            String seatsStr = "";
+            String flightInfo = "";
+
+            if (roundTrip != null && roundTrip) {
+                // Outbound
+                if (outboundF != null && outboundF.getFlightId() != null && outboundF.getFlightId() < 0) {
+                    outboundF = flightService.saveFlightFromAmadeus(outboundF);
+                }
+                
+                List<String> outSeats = (List<String>) session.getAttribute("booking_outboundSeatNumbers");
+                String outSeatsStr = outSeats != null ? String.join(", ", outSeats) : "";
+                
+                Booking b1 = new Booking();
+                b1.setUser(user);
+                b1.setFlight(outboundF);
+                b1.setBookingDate(LocalDateTime.now());
+                b1.setNumberOfSeats(outSeatsStr);
+                b1.setTotalPrice((Double) session.getAttribute("booking_outboundTotalPrice"));
+                b1.setStatus("CONFIRMED");
+                b1.setName(passengerName);
+                b1.setEmail(passengerEmail);
+                b1.setGender(passengerGender);
+                b1.setCountry(passengerCountry);
+                b1.setCodeBooking(txnRef);
+                b1.setClassType((String) session.getAttribute("booking_outboundClassType"));
+                bookingRepository.save(b1);
+                
+                if (returnF != null && returnF.getFlightId() != null && returnF.getFlightId() < 0) {
+                    returnF = flightService.saveFlightFromAmadeus(returnF);
+                }
+                
+                List<String> retSeats = (List<String>) session.getAttribute("booking_returnSeatNumbers");
+                String retSeatsStr = retSeats != null ? String.join(", ", retSeats) : "";
+
+                Booking b2 = new Booking();
+                b2.setUser(user);
+                b2.setFlight(returnF);
+                b2.setBookingDate(LocalDateTime.now());
+                b2.setNumberOfSeats(retSeatsStr);
+                b2.setTotalPrice((Double) session.getAttribute("booking_returnTotalPrice"));
+                b2.setStatus("CONFIRMED");
+                b2.setName(passengerName);
+                b2.setEmail(passengerEmail);
+                b2.setGender(passengerGender);
+                b2.setCountry(passengerCountry);
+                b2.setCodeBooking(txnRef);
+                b2.setClassType((String) session.getAttribute("booking_returnClassType"));
+                bookingRepository.save(b2);
+
+                seatsStr = "Đi: " + outSeatsStr + " | Về: " + retSeatsStr;
+                flightInfo = (outboundF != null ? outboundF.getFlightNumber() : "---") + " & " + (returnF != null ? returnF.getFlightNumber() : "---");
+
+                Payment p = new Payment();
+                p.setBooking(b1); 
+                p.setPayMethod(vnpayMethod);
+                p.setPaymentDate(LocalDateTime.now());
+                p.setAmount(amountVnd);
+                p.setPaymentStatus("SUCCESS");
+                paymentRepository.save(p);
+
+            } else {
+                if (oneWayF != null && oneWayF.getFlightId() != null && oneWayF.getFlightId() < 0) {
+                    oneWayF = flightService.saveFlightFromAmadeus(oneWayF);
+                }
+
+                List<String> sList = (List<String>) session.getAttribute("booking_seatNumbers");
+                String sStr = sList != null ? String.join(", ", sList) : "";
+
+                Booking b = new Booking();
+                b.setUser(user);
+                b.setFlight(oneWayF);
+                b.setBookingDate(LocalDateTime.now());
+                b.setNumberOfSeats(sStr);
+                b.setTotalPrice((Double) session.getAttribute("booking_totalPrice"));
+                b.setStatus("CONFIRMED");
+                b.setName(passengerName);
+                b.setEmail(passengerEmail);
+                b.setGender(passengerGender);
+                b.setCountry(passengerCountry);
+                b.setCodeBooking(txnRef);
+                b.setClassType((String) session.getAttribute("booking_classType"));
+                bookingRepository.save(b);
+
+                seatsStr = sStr;
+                flightInfo = (oneWayF != null ? oneWayF.getFlightNumber() : "---");
+
+                Payment p = new Payment();
+                p.setBooking(b);
+                p.setPayMethod(vnpayMethod);
+                p.setPaymentDate(LocalDateTime.now());
+                p.setAmount(amountVnd);
+                p.setPaymentStatus("SUCCESS");
+                paymentRepository.save(p);
+            }
+
+            try {
+                mailService.sendTicketEmail(passengerEmail, passengerName, flightInfo, seatsStr, amountVnd, txnRef);
+            } catch (Exception e) {
+                System.err.println("Error sending email: " + e.getMessage());
+            }
+
             session.removeAttribute("booking_roundtrip");
             session.removeAttribute("booking_flightId");
             session.removeAttribute("booking_seatIds");
